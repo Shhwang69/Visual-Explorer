@@ -24,7 +24,7 @@
             background: white;
             border-radius: 12px;
             box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-            overflow: hidden;
+            overflow: visible;
         }
         
         .header {
@@ -32,6 +32,7 @@
             color: white;
             padding: 40px 20px;
             text-align: center;
+            position: relative;
         }
         
         .header h1 {
@@ -59,7 +60,7 @@
         
         .content {
             padding: 40px;
-            padding-top: 80px;
+            position: relative;
         }
         
         .screen {
@@ -226,21 +227,19 @@
             font-size: 1.1em;
         }
         
-        /* Fixed Floating Button */
+        /* Fixed Review Button - 정확한 위치 */
         .floating-button-wrapper {
             position: fixed;
-            top: 0;
-            right: 0;
-            z-index: 9999;
-            display: flex;
-            justify-content: flex-end;
+            top: 135px;
+            right: 60px;
+            z-index: 998;
+            display: none;
+            justify-content: center;
             align-items: center;
-            padding: 20px 40px;
-            background: linear-gradient(to left, rgba(255,255,255,0.98), rgba(255,255,255,0.95));
-            border-bottom: 2px solid #f0f0f0;
-            border-left: 2px solid #f0f0f0;
-            box-shadow: -4px 4px 12px rgba(0,0,0,0.1);
-            height: 80px;
+        }
+        
+        .floating-button-wrapper.visible {
+            display: flex;
         }
         
         .floating-button {
@@ -501,8 +500,8 @@
             }
             
             .floating-button-wrapper {
-                padding: 15px 20px;
-                height: 70px;
+                top: 125px;
+                right: 20px;
             }
             
             .floating-button {
@@ -518,7 +517,6 @@
             
             .content {
                 padding: 20px;
-                padding-top: 90px;
             }
             
             .button-group {
@@ -543,7 +541,7 @@
         </div>
         
         <!-- Fixed Review Button -->
-        <div class="floating-button-wrapper" id="floatingButtonWrapper" style="display: none;">
+        <div class="floating-button-wrapper" id="floatingButtonWrapper">
             <button class="floating-button" id="submitBtn" onclick="handleReviewClick()" disabled>
                 <span>✓</span>
                 <span id="btnLabel">Review</span>
@@ -827,7 +825,6 @@
             const selCountEl = document.getElementById(selCount);
             if (selCountEl) selCountEl.textContent = selection.length;
             
-            // Update floating button
             const submitBtn = document.getElementById('submitBtn');
             if (submitBtn) {
                 submitBtn.disabled = selection.length < 3;
@@ -850,22 +847,17 @@
             const wrapper = document.getElementById('floatingButtonWrapper');
             const btnLabel = document.getElementById('btnLabel');
             const btnCount = document.getElementById('btnCount');
-            const submitBtn = document.getElementById('submitBtn');
             
             if (state.currentScreen === 'current') {
-                wrapper.style.display = 'flex';
+                wrapper.classList.add('visible');
                 btnLabel.textContent = 'Review';
                 btnCount.textContent = `${state.currentSelection.length}/3`;
-                submitBtn.disabled = state.currentSelection.length < 3;
-                submitBtn.onclick = () => goToCurrentReview();
             } else if (state.currentScreen === 'future') {
-                wrapper.style.display = 'flex';
+                wrapper.classList.add('visible');
                 btnLabel.textContent = 'Review';
                 btnCount.textContent = `${state.futureSelection.length}/3`;
-                submitBtn.disabled = state.futureSelection.length < 3;
-                submitBtn.onclick = () => goToFutureReview();
             } else {
-                wrapper.style.display = 'none';
+                wrapper.classList.remove('visible');
             }
         }
         
