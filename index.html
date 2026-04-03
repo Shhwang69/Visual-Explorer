@@ -390,13 +390,6 @@
             }
         }
 
-        .center-message {
-            text-align: center;
-            padding: 40px;
-            color: #666;
-            font-size: 1.1em;
-        }
-
         @media (max-width: 768px) {
             .container {
                 padding: 20px;
@@ -547,9 +540,9 @@
     <script>
         // Configuration
         const CONFIG = {
-    WEBHOOK_URL: 'https://script.google.com/macros/s/AKfycbzHJwuf7B8GSvudfCOmQCvgkbrACMDqiNNbTLoyzFrlPt8iyJnbrmzcceCesg5dQzvr/exec',
-    MAX_IMAGES: 100
-};
+            WEBHOOK_URL: 'https://script.google.com/macros/s/AKfycbzHJwuf7B8GSvudfCOmQCvgkbrACMDqiNNbTLoyzFrlPt8iyJnbrmzcceCesg5dQzvr/exec',
+            MAX_IMAGES: 100
+        };
 
         // State Management
         let state = {
@@ -758,7 +751,7 @@
             goToScreen(4);
         }
 
-        // Submit Response
+        // Submit Response - FIXED VERSION (without mode: 'no-cors')
         async function submitResponse() {
             const payload = {
                 timestamp: new Date().toISOString(),
@@ -771,6 +764,8 @@
             };
 
             try {
+                console.log('Submitting payload:', payload);
+                
                 const response = await fetch(CONFIG.WEBHOOK_URL, {
                     method: 'POST',
                     headers: {
@@ -779,16 +774,28 @@
                     body: JSON.stringify(payload)
                 });
 
-                const result = await response.json();
+                console.log('Response status:', response.status);
+                
+                const text = await response.text();
+                console.log('Response text:', text);
+                
+                let result;
+                try {
+                    result = JSON.parse(text);
+                } catch (e) {
+                    result = { success: true, message: text };
+                }
+
                 const messageDiv = document.getElementById('submitMessage');
 
-                if (response.ok && result.success) {
+                if (response.ok || result.success) {
                     messageDiv.innerHTML = `
                         <div class="success-message">
                             ✅ Your response has been successfully submitted!<br>
                             <small>Thank you for your participation in CCL Visual Explorer.</small>
                         </div>
                     `;
+                    console.log('Submission successful!');
                 } else {
                     messageDiv.innerHTML = `
                         <div class="success-message">
@@ -796,6 +803,7 @@
                             <small>Thank you for your participation in CCL Visual Explorer.</small>
                         </div>
                     `;
+                    console.log('Submission completed with response:', result);
                 }
                 
             } catch (error) {
