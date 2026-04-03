@@ -1,0 +1,8 @@
+{
+  "name": "gggi-visual-explorer",
+  "version": "1.0.0",
+  "description": "GGGI Visual Explorer for organizational culture assessment",
+  "scripts": {
+    "start": "echo 'Static site'"
+  }
+}
