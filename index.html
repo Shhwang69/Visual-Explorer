@@ -554,7 +554,8 @@
             card.className = 'image-card';
             card.id = `${session}-${image.id}`;
 
-            const imageUrl = `https://drive.google.com/uc?id=${image.fileId}&export=download`;
+            const imageUrl = `https://drive.google.com/thumbnail?id=${image.fileId}&sz=w200`;
+
 
             card.innerHTML = `
                 <img src="${imageUrl}" alt="Card ${image.id}" loading="lazy">
