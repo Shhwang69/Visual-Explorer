@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title> Culture Visual Explorer</title>
+    <title>CCL Visual Explorer</title>
     <style>
         * {
             margin: 0;
@@ -59,6 +59,7 @@
         
         .content {
             padding: 40px;
+            padding-top: 80px;
         }
         
         .screen {
@@ -225,17 +226,21 @@
             font-size: 1.1em;
         }
         
+        /* Fixed Floating Button */
         .floating-button-wrapper {
-            position: sticky;
+            position: fixed;
             top: 0;
-            z-index: 999;
+            right: 0;
+            z-index: 9999;
             display: flex;
             justify-content: flex-end;
-            padding: 15px 20px;
-            background: linear-gradient(to bottom, rgba(255,255,255,0.99), rgba(255,255,255,0.95));
-            margin-bottom: 20px;
+            align-items: center;
+            padding: 20px 40px;
+            background: linear-gradient(to left, rgba(255,255,255,0.98), rgba(255,255,255,0.95));
             border-bottom: 2px solid #f0f0f0;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            border-left: 2px solid #f0f0f0;
+            box-shadow: -4px 4px 12px rgba(0,0,0,0.1);
+            height: 80px;
         }
         
         .floating-button {
@@ -495,16 +500,16 @@
                 height: 180px;
             }
             
+            .floating-button-wrapper {
+                padding: 15px 20px;
+                height: 70px;
+            }
+            
             .floating-button {
                 padding: 12px 20px;
                 font-size: 0.9em;
-                min-width: 150px;
+                min-width: 140px;
                 gap: 6px;
-            }
-            
-            .floating-button-wrapper {
-                padding: 12px 15px;
-                margin-bottom: 15px;
             }
             
             .header h1 {
@@ -513,6 +518,7 @@
             
             .content {
                 padding: 20px;
+                padding-top: 90px;
             }
             
             .button-group {
@@ -529,11 +535,20 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>🎨 Culture Visual Explorer</h1>
+            <h1>🎨 CCL Visual Explorer</h1>
             <p>Discover your organizational culture through visual storytelling</p>
         </div>
         <div class="progress-bar">
             <div class="progress-fill" id="progressFill"></div>
+        </div>
+        
+        <!-- Fixed Review Button -->
+        <div class="floating-button-wrapper" id="floatingButtonWrapper" style="display: none;">
+            <button class="floating-button" id="submitBtn" onclick="handleReviewClick()" disabled>
+                <span>✓</span>
+                <span id="btnLabel">Review</span>
+                <span class="button-count" id="btnCount">0/3</span>
+            </button>
         </div>
         
         <div class="content">
@@ -571,14 +586,6 @@
             
             <!-- Screen 2: Current Culture Selection -->
             <div class="screen" id="screen-current">
-                <div class="floating-button-wrapper">
-                    <button class="floating-button" id="submitCurrentBtn" onclick="goToCurrentReview()" disabled>
-                        <span>✓</span>
-                        <span>Review</span>
-                        <span class="button-count" id="currentCount">0/3</span>
-                    </button>
-                </div>
-                
                 <div class="gallery-container">
                     <h2 class="gallery-title">📌 Current Culture</h2>
                     <p class="instruction-text">Select 3 images that best represent your organization's <strong>CURRENT</strong> culture. Click each image and add your thoughts.</p>
@@ -605,14 +612,6 @@
             
             <!-- Screen 4: Future Culture Selection -->
             <div class="screen" id="screen-future">
-                <div class="floating-button-wrapper">
-                    <button class="floating-button" id="submitFutureBtn" onclick="goToFutureReview()" disabled>
-                        <span>✓</span>
-                        <span>Review</span>
-                        <span class="button-count" id="futureCount">0/3</span>
-                    </button>
-                </div>
-                
                 <div class="gallery-container">
                     <h2 class="gallery-title">🌟 Future Culture</h2>
                     <p class="instruction-text">Select 3 images that represent your organization's <strong>DESIRED FUTURE</strong> culture. Click each image and add your thoughts.</p>
@@ -675,7 +674,7 @@
     
     <script>
         const CONFIG = {
-            WEBHOOK_URL: 'https://script.google.com/macros/s/AKfycbwBcs7a7iw39VZLehA_vW8fRyvNjC86_tFdp2Ft0c7BxHJe9WaXlTDldMwPrUZ4uiKB/exec',
+            WEBHOOK_URL: 'https://script.google.com/macros/s/AKfycbxwIejOq91fTKayzBNjDT0744zPRevxF5BD96PwaPCMUNYT8m7A-DUDuCXJI_8-VQP5/exec',
             GITHUB_REPO: 'Shhwang69/Visual-Explorer',
             GITHUB_BRANCH: 'main',
             IMAGES_FOLDER: 'images',
@@ -688,7 +687,8 @@
             currentNotes: {},
             futureSelection: [],
             futureNotes: {},
-            images: []
+            images: [],
+            currentScreen: 'info'
         };
         
         async function loadImages() {
@@ -751,7 +751,6 @@
                 
                 const noteText = type === 'current' ? (state.currentNotes[index] || '') : (state.futureNotes[index] || '');
                 
-                // 선택되지 않은 카드는 textarea 비활성화
                 const isDisabled = !isSelected;
                 
                 card.innerHTML = `
@@ -776,7 +775,6 @@
                 gallery.appendChild(card);
             });
             
-            // 노트 입력 이벤트 리스너
             const noteInputs = gallery.querySelectorAll('.note-input');
             noteInputs.forEach(input => {
                 input.addEventListener('change', (e) => {
@@ -820,18 +818,20 @@
         
         function updateUI(type) {
             const selection = type === 'current' ? state.currentSelection : state.futureSelection;
-            const btn = type === 'current' ? 'submitCurrentBtn' : 'submitFutureBtn';
             const count = type === 'current' ? 'currentCount' : 'futureCount';
             const selCount = type === 'current' ? 'currentSelectionCount' : 'futureSelectionCount';
-            
-            const btnEl = document.getElementById(btn);
-            if (btnEl) btnEl.disabled = selection.length < 3;
             
             const countEl = document.getElementById(count);
             if (countEl) countEl.textContent = `${selection.length}/3`;
             
             const selCountEl = document.getElementById(selCount);
             if (selCountEl) selCountEl.textContent = selection.length;
+            
+            // Update floating button
+            const submitBtn = document.getElementById('submitBtn');
+            if (submitBtn) {
+                submitBtn.disabled = selection.length < 3;
+            }
             
             updateProgress();
         }
@@ -844,6 +844,37 @@
             
             const progress = (step / 5) * 100;
             document.getElementById('progressFill').style.width = progress + '%';
+        }
+        
+        function updateFloatingButton() {
+            const wrapper = document.getElementById('floatingButtonWrapper');
+            const btnLabel = document.getElementById('btnLabel');
+            const btnCount = document.getElementById('btnCount');
+            const submitBtn = document.getElementById('submitBtn');
+            
+            if (state.currentScreen === 'current') {
+                wrapper.style.display = 'flex';
+                btnLabel.textContent = 'Review';
+                btnCount.textContent = `${state.currentSelection.length}/3`;
+                submitBtn.disabled = state.currentSelection.length < 3;
+                submitBtn.onclick = () => goToCurrentReview();
+            } else if (state.currentScreen === 'future') {
+                wrapper.style.display = 'flex';
+                btnLabel.textContent = 'Review';
+                btnCount.textContent = `${state.futureSelection.length}/3`;
+                submitBtn.disabled = state.futureSelection.length < 3;
+                submitBtn.onclick = () => goToFutureReview();
+            } else {
+                wrapper.style.display = 'none';
+            }
+        }
+        
+        function handleReviewClick() {
+            if (state.currentScreen === 'current') {
+                goToCurrentReview();
+            } else if (state.currentScreen === 'future') {
+                goToFutureReview();
+            }
         }
         
         function goToCurrentCulture() {
@@ -863,7 +894,9 @@
                 notes: document.getElementById('notes').value.trim()
             };
             
+            state.currentScreen = 'current';
             showScreen('screen-current');
+            updateFloatingButton();
             updateProgress();
         }
         
@@ -873,17 +906,20 @@
                 return;
             }
             renderReviewGrid('currentReviewGrid', state.currentSelection, state.currentNotes);
+            state.currentScreen = 'review-current';
             showScreen('screen-current-review');
+            updateFloatingButton();
             updateProgress();
         }
         
         function goToFutureCulture() {
-            // Future Culture로 이동할 때 Future 선택사항 완전 초기화
             state.futureSelection = [];
             state.futureNotes = {};
             renderGallery('future');
             updateUI('future');
+            state.currentScreen = 'future';
             showScreen('screen-future');
+            updateFloatingButton();
             updateProgress();
         }
         
@@ -893,14 +929,18 @@
                 return;
             }
             renderReviewGrid('futureReviewGrid', state.futureSelection, state.futureNotes);
+            state.currentScreen = 'review-future';
             showScreen('screen-future-review');
+            updateFloatingButton();
             updateProgress();
         }
         
         function goToFinalReview() {
             renderReviewGrid('currentFinalReviewGrid', state.currentSelection, state.currentNotes);
             renderReviewGrid('futureFinalReviewGrid', state.futureSelection, state.futureNotes);
+            state.currentScreen = 'final';
             showScreen('screen-final-review');
+            updateFloatingButton();
             updateProgress();
         }
         
@@ -935,13 +975,11 @@
             payload.append('organization', state.userInfo.organization);
             payload.append('notes', state.userInfo.notes);
             
-            // Current Selection (이미지 이름 + 노트)
             state.currentSelection.forEach((idx, i) => {
                 payload.append(`current${i + 1}`, state.images[idx].name);
                 payload.append(`currentNote${i + 1}`, state.currentNotes[idx] || '');
             });
             
-            // Future Selection (이미지 이름 + 노트)
             state.futureSelection.forEach((idx, i) => {
                 payload.append(`future${i + 1}`, state.images[idx].name);
                 payload.append(`futureNote${i + 1}`, state.futureNotes[idx] || '');
@@ -954,11 +992,14 @@
                 });
                 
                 console.log('Submission status:', response.status);
+                state.currentScreen = 'completion';
                 showScreen('screen-completion');
+                updateFloatingButton();
                 updateProgress();
                 
             } catch (error) {
                 console.error('Error:', error);
+                state.currentScreen = 'completion';
                 showScreen('screen-completion');
             }
         }
@@ -976,32 +1017,29 @@
         }
         
         function resetAll() {
-            // 완전 초기화: 모든 상태 리셋
             state = {
                 userInfo: {},
                 currentSelection: [],
                 currentNotes: {},
                 futureSelection: [],
                 futureNotes: {},
-                images: state.images  // 이미지만 유지
+                images: state.images,
+                currentScreen: 'info'
             };
             
-            // 폼 필드 초기화
             document.getElementById('fullName').value = '';
             document.getElementById('email').value = '';
             document.getElementById('organization').value = '';
             document.getElementById('notes').value = '';
             
-            // 갤러리 초기화
             renderGallery('current');
             renderGallery('future');
             
-            // 갤러리 UI 업데이트 초기화
             updateUI('current');
             updateUI('future');
             
-            // 홈 화면으로 이동
             showScreen('screen-info');
+            updateFloatingButton();
             updateProgress();
         }
         
