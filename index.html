@@ -190,7 +190,7 @@
             font-size: 0.9em;
             font-family: inherit;
             resize: vertical;
-            transition: border-color 0.2s ease;
+            transition: border-color 0.2s ease, background-color 0.2s ease;
         }
         
         .card-note textarea:focus {
@@ -200,6 +200,18 @@
         
         .card-note textarea::placeholder {
             color: #999;
+        }
+        
+        .card-note textarea:disabled {
+            background-color: #efefef;
+            cursor: not-allowed;
+            opacity: 0.6;
+            color: #999;
+            border-color: #ddd;
+        }
+        
+        .card-note textarea:disabled::placeholder {
+            color: #ccc;
         }
         
         .selection-count {
@@ -267,7 +279,6 @@
             display: inline-block;
         }
         
-        /* Review Grid */
         .review-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -664,7 +675,7 @@
     
     <script>
         const CONFIG = {
-            WEBHOOK_URL: 'https://script.google.com/macros/s/AKfycbzV6nA_9wpOoOzDSsvsvO1_6DtNvilbRCPh-Vzp4VMIYh_NG3dANrUOWDt7A0HtDBt1/exec',
+            WEBHOOK_URL: 'https://script.google.com/macros/s/AKfycbxwIejOq91fTKayzBNjDT0744zPRevxF5BD96PwaPCMUNYT8m7A-DUDuCXJI_8-VQP5/exec',
             GITHUB_REPO: 'Shhwang69/Visual-Explorer',
             GITHUB_BRANCH: 'main',
             IMAGES_FOLDER: 'images',
@@ -740,10 +751,19 @@
                 
                 const noteText = type === 'current' ? (state.currentNotes[index] || '') : (state.futureNotes[index] || '');
                 
+                // 선택되지 않은 카드는 textarea 비활성화
+                const isDisabled = !isSelected;
+                
                 card.innerHTML = `
                     <img src="${image.url}" alt="${image.name}" loading="lazy">
                     <div class="card-note">
-                        <textarea placeholder="Your thoughts..." class="note-input" data-type="${type}" data-index="${index}">${noteText}</textarea>
+                        <textarea 
+                            placeholder="Your thoughts..." 
+                            class="note-input" 
+                            data-type="${type}" 
+                            data-index="${index}"
+                            ${isDisabled ? 'disabled' : ''}
+                        >${noteText}</textarea>
                     </div>
                 `;
                 
@@ -756,6 +776,7 @@
                 gallery.appendChild(card);
             });
             
+            // 노트 입력 이벤트 리스너
             const noteInputs = gallery.querySelectorAll('.note-input');
             noteInputs.forEach(input => {
                 input.addEventListener('change', (e) => {
@@ -820,7 +841,6 @@
             if (Object.keys(state.userInfo).length > 0) step = 2;
             if (state.currentSelection.length === 3) step = 3;
             if (state.futureSelection.length === 3) step = 4;
-            if (state.futureSelection.length === 3) step = 5;
             
             const progress = (step / 5) * 100;
             document.getElementById('progressFill').style.width = progress + '%';
@@ -858,6 +878,11 @@
         }
         
         function goToFutureCulture() {
+            // Future Culture로 이동할 때 Future 선택사항 완전 초기화
+            state.futureSelection = [];
+            state.futureNotes = {};
+            renderGallery('future');
+            updateUI('future');
             showScreen('screen-future');
             updateProgress();
         }
@@ -903,18 +928,20 @@
         }
         
         async function submitResponse() {
-            const payload = new FormData();
+            const payload = new URLSearchParams();
             payload.append('timestamp', new Date().toISOString());
             payload.append('name', state.userInfo.fullName);
             payload.append('email', state.userInfo.email);
             payload.append('organization', state.userInfo.organization);
             payload.append('notes', state.userInfo.notes);
             
+            // Current Selection (이미지 이름 + 노트)
             state.currentSelection.forEach((idx, i) => {
                 payload.append(`current${i + 1}`, state.images[idx].name);
                 payload.append(`currentNote${i + 1}`, state.currentNotes[idx] || '');
             });
             
+            // Future Selection (이미지 이름 + 노트)
             state.futureSelection.forEach((idx, i) => {
                 payload.append(`future${i + 1}`, state.images[idx].name);
                 payload.append(`futureNote${i + 1}`, state.futureNotes[idx] || '');
@@ -949,18 +976,31 @@
         }
         
         function resetAll() {
+            // 완전 초기화: 모든 상태 리셋
             state = {
                 userInfo: {},
                 currentSelection: [],
                 currentNotes: {},
                 futureSelection: [],
                 futureNotes: {},
-                images: state.images
+                images: state.images  // 이미지만 유지
             };
+            
+            // 폼 필드 초기화
             document.getElementById('fullName').value = '';
             document.getElementById('email').value = '';
             document.getElementById('organization').value = '';
             document.getElementById('notes').value = '';
+            
+            // 갤러리 초기화
+            renderGallery('current');
+            renderGallery('future');
+            
+            // 갤러리 UI 업데이트 초기화
+            updateUI('current');
+            updateUI('future');
+            
+            // 홈 화면으로 이동
             showScreen('screen-info');
             updateProgress();
         }
