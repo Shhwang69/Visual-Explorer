@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GGGI Visual Explorer - 조직문화 진단</title>
+    <title>GGGI Visual Explorer - Organizational Culture Assessment</title>
     <style>
         * {
             margin: 0;
@@ -381,8 +381,8 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>🎨 GGGI 조직문화 진단</h1>
-            <p>Visual Explorer를 통해 현재와 미래의 조직문화를 표현해주세요</p>
+            <h1>🎨 GGGI Organizational Culture Assessment</h1>
+            <p>Express your vision of our organization's current and future culture through Visual Explorer</p>
         </div>
 
         <div class="content">
@@ -390,99 +390,98 @@
 
             <div id="loading-screen" class="loading-screen">
                 <div class="spinner"></div>
-                <div class="loading-text">이미지를 불러오는 중입니다...</div>
+                <div class="loading-text">Loading images...</div>
             </div>
 
             <div class="session-container" id="session-current" style="display: none;">
-                <h2 class="session-title">📍 현재: 우리 조직은 지금 어떤 모습인가요?</h2>
+                <h2 class="session-title">📍 Current: What does our organization look like today?</h2>
                 <p class="session-subtitle">
-                    아래 카드 중에서 현재 GGGI의 사람들, 문화, 그리고 일하는 방식을 가장 잘 나타낸다고 생각되는 카드 3장을 선택해주세요.
-                    우리 조직의 강점도 함께 고려해주세요.
+                    Select 3 cards from below that best represent GGGI's current state - our people, culture, and way of working. Please also consider our organizational strengths.
                 </p>
 
                 <div class="instruction">
-                    <strong>📌 가이드:</strong> 3개의 이미지를 선택한 후 "다음 단계로"를 클릭해주세요. 각 이미지를 클릭하면 선택/해제됩니다.
+                    <strong>📌 Instructions:</strong> Select 3 images that reflect your view of our current organizational culture. Click each image to select or deselect it. The selected images will be highlighted with a blue border.
                 </div>
 
                 <div class="selection-info">
-                    <span class="selection-count">선택: <span id="current-count">0</span>/3</span>
-                    <span style="color: #666; font-size: 0.9em;">선택 시 이미지 테두리가 파란색으로 변합니다</span>
+                    <span class="selection-count">Selected: <span id="current-count">0</span>/3</span>
+                    <span style="color: #666; font-size: 0.9em;">Selected images will have blue borders</span>
                 </div>
 
                 <div class="gallery" id="gallery-current"></div>
 
                 <div class="button-group">
-                    <button class="btn-secondary" onclick="clearSelectionCurrent()">모두 해제</button>
+                    <button class="btn-secondary" onclick="clearSelectionCurrent()">Clear All</button>
                     <button class="btn-primary" id="btn-next-current" onclick="proceedToFuture()" disabled>
-                        다음: 미래의 모습 →
+                        Next: Future Vision →
                     </button>
                 </div>
             </div>
 
             <div class="session-container" id="session-future" style="display: none;">
-                <h2 class="session-title">🚀 미래: 우리 조직이 지향해야 할 모습은?</h2>
+                <h2 class="session-title">🚀 Future: What should our organization become?</h2>
                 <p class="session-subtitle">
-                    이번엔 GGGI가 앞으로 나아가야 할 방향, 미래에 가져야 할 문화와 일하는 방식을 나타내는 카드 3장을 선택해주세요.
+                    Now select 3 cards that represent the direction GGGI should move toward - the culture and way of working we aspire to achieve in the future.
                 </p>
 
                 <div class="instruction">
-                    <strong>📌 가이드:</strong> 미래 지향적인 카드 3개를 선택하고 정보를 입력한 후 "응답 제출"을 클릭해주세요.
+                    <strong>📌 Instructions:</strong> Select 3 images representing your vision for GGGI's future culture. Fill in your information below and submit your response.
                 </div>
 
                 <div class="response-form">
-                    <h4 style="color: #667eea; margin-bottom: 15px;">📋 기본 정보</h4>
+                    <h4 style="color: #667eea; margin-bottom: 15px;">📋 Your Information</h4>
                     <div class="form-group">
-                        <label for="user-email">이메일: <span style="color: red;">*</span></label>
+                        <label for="user-email">Email: <span style="color: red;">*</span></label>
                         <input type="email" id="user-email" placeholder="your.email@gggi.org" required>
                     </div>
                     <div class="form-group">
-                        <label for="user-name">이름: <span style="color: red;">*</span></label>
-                        <input type="text" id="user-name" placeholder="이름을 입력해주세요" required>
+                        <label for="user-name">Name: <span style="color: red;">*</span></label>
+                        <input type="text" id="user-name" placeholder="Enter your name" required>
                     </div>
                     <div class="form-group">
-                        <label for="user-notes">의견 (선택사항):</label>
-                        <textarea id="user-notes" placeholder="추가 의견이 있으시면 작성해주세요"></textarea>
+                        <label for="user-notes">Comments (Optional):</label>
+                        <textarea id="user-notes" placeholder="Share any additional thoughts or insights"></textarea>
                     </div>
                 </div>
 
                 <div class="selection-info">
-                    <span class="selection-count">선택: <span id="future-count">0</span>/3</span>
+                    <span class="selection-count">Selected: <span id="future-count">0</span>/3</span>
                 </div>
 
                 <div class="gallery" id="gallery-future"></div>
 
                 <div class="button-group">
-                    <button class="btn-secondary" onclick="backToCurrent()">← 이전으로</button>
-                    <button class="btn-secondary" onclick="clearSelectionFuture()">모두 해제</button>
+                    <button class="btn-secondary" onclick="backToCurrent()">← Back</button>
+                    <button class="btn-secondary" onclick="clearSelectionFuture()">Clear All</button>
                     <button class="btn-primary" id="btn-submit" onclick="submitResponses()" disabled>
-                        응답 제출 ✓
+                        Submit Response ✓
                     </button>
                 </div>
             </div>
 
             <div class="completion-section" id="completion-section">
-                <h2>🎉 감사합니다!</h2>
-                <p>당신의 응답이 성공적으로 기록되었습니다.</p>
+                <h2>🎉 Thank You!</h2>
+                <p>Your response has been successfully recorded.</p>
                 
-                <h3 style="color: #667eea; margin-top: 30px; margin-bottom: 15px;">선택하신 카드들</h3>
+                <h3 style="color: #667eea; margin-top: 30px; margin-bottom: 15px;">Your Selected Cards</h3>
                 
                 <div style="margin-bottom: 30px;">
-                    <h4 style="color: #666; margin-bottom: 15px;">📍 현재 조직문화</h4>
+                    <h4 style="color: #666; margin-bottom: 15px;">📍 Current Organizational Culture</h4>
                     <div class="selected-images" id="completion-current"></div>
                 </div>
 
                 <div style="margin-bottom: 30px;">
-                    <h4 style="color: #666; margin-bottom: 15px;">🚀 미래 조직문화</h4>
+                    <h4 style="color: #666; margin-bottom: 15px;">🚀 Future Organizational Culture</h4>
                     <div class="selected-images" id="completion-future"></div>
                 </div>
 
-                <button class="btn-primary" onclick="resetForm()">새로 시작</button>
+                <button class="btn-primary" onclick="resetForm()">Start Over</button>
             </div>
         </div>
     </div>
 
     <script>
-        // ===== 설정 =====
+        // ===== Configuration =====
         const CONFIG = {
             SHEET_ID: '1jXSW6H3YFsgIzYjFqD7eNlWyrWbPHsBTwz-Wduis1Nk',
             WEBHOOK_URL: 'https://script.google.com/macros/s/AKfycbxHF0YM_Gx7PkqZZKRrv8k2U9UAOQbzpuJC15ILt48FH0KqrytTRh1dnQuLKfKFsw/exec',
@@ -501,8 +500,8 @@
                 document.getElementById('loading-screen').style.display = 'none';
                 document.getElementById('session-current').style.display = 'block';
             } catch (error) {
-                showAlert('이미지 로드에 실패했습니다: ' + error.message, 'error');
-                console.error('초기화 오류:', error);
+                showAlert('Failed to load images: ' + error.message, 'error');
+                console.error('Initialization error:', error);
             }
         });
 
@@ -518,7 +517,7 @@
                 const data = await response.json();
 
                 if (!data.values || data.values.length < 2) {
-                    throw new Error('이미지 데이터가 없습니다. ImageMapping 시트를 확인해주세요.');
+                    throw new Error('No image data found. Please check the ImageMapping sheet.');
                 }
 
                 allImages = data.values.slice(1).map(row => ({
@@ -527,9 +526,9 @@
                     fileId: row[2]
                 })).sort((a, b) => a.id - b.id);
 
-                console.log(`${allImages.length}개의 이미지 로드됨`);
+                console.log(`${allImages.length} images loaded`);
             } catch (error) {
-                console.error('이미지 로드 오류:', error);
+                console.error('Image loading error:', error);
                 throw error;
             }
         }
@@ -585,7 +584,7 @@
                     card.classList.add('selected');
                     selectedList.push(imageId);
                 } else {
-                    showAlert('최대 3개까지만 선택할 수 있습니다!', 'error');
+                    showAlert('Maximum 3 cards can be selected!', 'error');
                     return;
                 }
             }
@@ -621,7 +620,7 @@
 
         function proceedToFuture() {
             if (selectedCurrent.length !== 3) {
-                showAlert('현재 조직문화를 나타내는 카드 3개를 선택해주세요!', 'error');
+                showAlert('Please select 3 cards representing the current organizational culture!', 'error');
                 return;
             }
 
@@ -638,7 +637,7 @@
 
         async function submitResponses() {
             if (selectedFuture.length !== 3) {
-                showAlert('미래 조직문화를 나타내는 카드 3개를 선택해주세요!', 'error');
+                showAlert('Please select 3 cards representing the future organizational culture!', 'error');
                 return;
             }
 
@@ -647,20 +646,20 @@
             const notes = document.getElementById('user-notes').value.trim();
 
             if (!email || !name) {
-                showAlert('이메일과 이름을 입력해주세요!', 'error');
+                showAlert('Please enter your email and name!', 'error');
                 return;
             }
 
             const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
             if (!emailRegex.test(email)) {
-                showAlert('유효한 이메일 주소를 입력해주세요!', 'error');
+                showAlert('Please enter a valid email address!', 'error');
                 return;
             }
 
             try {
                 const submitBtn = document.getElementById('btn-submit');
                 submitBtn.disabled = true;
-                submitBtn.textContent = '제출 중...';
+                submitBtn.textContent = 'Submitting...';
 
                 await saveToGoogleSheet({
                     timestamp: new Date().toISOString(),
@@ -672,12 +671,12 @@
                 });
 
                 displayCompletion();
-                showAlert('응답이 성공적으로 제출되었습니다!', 'success');
+                showAlert('Your response has been successfully submitted!', 'success');
             } catch (error) {
-                console.error('제출 실패:', error);
-                showAlert('응답 제출 중 오류가 발생했습니다: ' + error.message, 'error');
+                console.error('Submission failed:', error);
+                showAlert('Error submitting response: ' + error.message, 'error');
                 document.getElementById('btn-submit').disabled = false;
-                document.getElementById('btn-submit').textContent = '응답 제출 ✓';
+                document.getElementById('btn-submit').textContent = 'Submit Response ✓';
             }
         }
 
@@ -694,12 +693,12 @@
                 const result = await response.json();
 
                 if (!result.success) {
-                    throw new Error(result.message || '알 수 없는 오류 발생');
+                    throw new Error(result.message || 'Unknown error occurred');
                 }
 
                 return result;
             } catch (error) {
-                console.error('저장 실패:', error);
+                console.error('Save failed:', error);
                 throw error;
             }
         }
