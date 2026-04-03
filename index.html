@@ -374,22 +374,6 @@
             margin-bottom: 20px;
         }
 
-        .loading {
-            display: inline-block;
-            width: 20px;
-            height: 20px;
-            border: 3px solid rgba(255, 255, 255, 0.3);
-            border-radius: 50%;
-            border-top-color: white;
-            animation: spin 1s ease-in-out infinite;
-        }
-
-        @keyframes spin {
-            to {
-                transform: rotate(360deg);
-            }
-        }
-
         @media (max-width: 768px) {
             .container {
                 padding: 20px;
@@ -540,7 +524,7 @@
     <script>
         // Configuration
         const CONFIG = {
-            WEBHOOK_URL: 'https://script.google.com/macros/s/AKfycbyRmhKyPD4NOqAR3QGKLRLsxMzc2ikvGGxhCGA_Bmyr7E7At_lwTAUIzRaR21juQjla/exec',
+            WEBHOOK_URL: 'https://script.google.com/macros/s/AKfycbxwIejOq91fTKayzBNjDT0744zPRevxF5BD96PwaPCMUNYT8m7A-DUDuCXJI_8-VQP5/exec',
             MAX_IMAGES: 100
         };
 
@@ -629,16 +613,13 @@
             const maxSelections = 3;
 
             if (selection.includes(imageId)) {
-                // Deselect
                 selection.splice(selection.indexOf(imageId), 1);
             } else {
-                // Select if not at max
                 if (selection.length < maxSelections) {
                     selection.push(imageId);
                 }
             }
 
-            // Update counters
             if (type === 'current') {
                 document.getElementById('currentCount').textContent = state.currentSelection.length;
                 renderCurrentGallery();
@@ -652,7 +633,6 @@
 
         // Navigation
         function goToScreen(screenNum) {
-            // Validate Screen 1
             if (screenNum === 2) {
                 const name = document.getElementById('userName').value.trim();
                 const email = document.getElementById('userEmail').value.trim();
@@ -669,16 +649,10 @@
                 state.userNotes = document.getElementById('userNotes').value.trim();
             }
 
-            // Hide all screens
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-
-            // Show target screen
             document.getElementById(`screen${screenNum}`).classList.add('active');
-
-            // Update progress bar
             updateProgressBar(screenNum);
 
-            // Populate review screens
             if (screenNum === 3) {
                 populateReviewGallery('current');
             } else if (screenNum === 5) {
@@ -696,7 +670,7 @@
             const gallery = document.getElementById(galleryId);
             gallery.innerHTML = '';
 
-            selection.forEach((imageId, index) => {
+            selection.forEach((imageId) => {
                 const image = state.images.find(img => img.id === imageId);
                 if (image) {
                     const card = document.createElement('div');
@@ -712,7 +686,6 @@
 
         // Populate Completion Gallery
         function populateCompletionGallery() {
-            // Current Culture
             const currentGallery = document.getElementById('completionCurrentGallery');
             currentGallery.innerHTML = '';
             state.currentSelection.forEach(imageId => {
@@ -720,14 +693,11 @@
                 if (image) {
                     const card = document.createElement('div');
                     card.className = 'completion-card';
-                    card.innerHTML = `
-                        <img src="${image.path}" alt="${image.name}">
-                    `;
+                    card.innerHTML = `<img src="${image.path}" alt="${image.name}">`;
                     currentGallery.appendChild(card);
                 }
             });
 
-            // Future Culture
             const futureGallery = document.getElementById('completionFutureGallery');
             futureGallery.innerHTML = '';
             state.futureSelection.forEach(imageId => {
@@ -735,9 +705,7 @@
                 if (image) {
                     const card = document.createElement('div');
                     card.className = 'completion-card';
-                    card.innerHTML = `
-                        <img src="${image.path}" alt="${image.name}">
-                    `;
+                    card.innerHTML = `<img src="${image.path}" alt="${image.name}">`;
                     futureGallery.appendChild(card);
                 }
             });
@@ -745,69 +713,48 @@
 
         // Proceed to Future Selection
         function proceedToFutureSelection() {
-            // Reset future selection
             state.futureSelection = [];
             document.getElementById('futureCount').textContent = '0';
             goToScreen(4);
         }
 
-        // Submit Response - FIXED VERSION (without mode: 'no-cors')
+        // Submit Response - CORS 우회 방식
         async function submitResponse() {
-            const payload = {
-                timestamp: new Date().toISOString(),
-                name: state.userName,
-                email: state.userEmail,
-                organization: state.userOrganization,
-                notes: state.userNotes,
-                currentSelection: state.currentSelection,
-                futureSelection: state.futureSelection
-            };
+            const formData = new URLSearchParams();
+            formData.append('name', state.userName);
+            formData.append('email', state.userEmail);
+            formData.append('organization', state.userOrganization);
+            formData.append('notes', state.userNotes);
+            formData.append('current1', state.currentSelection[0] || '');
+            formData.append('current2', state.currentSelection[1] || '');
+            formData.append('current3', state.currentSelection[2] || '');
+            formData.append('future1', state.futureSelection[0] || '');
+            formData.append('future2', state.futureSelection[1] || '');
+            formData.append('future3', state.futureSelection[2] || '');
 
             try {
-                console.log('Submitting payload:', payload);
+                console.log('🔄 Submitting to:', CONFIG.WEBHOOK_URL);
                 
                 const response = await fetch(CONFIG.WEBHOOK_URL, {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(payload)
+                    body: formData
                 });
 
-                console.log('Response status:', response.status);
-                
+                console.log('✓ Response status:', response.status);
                 const text = await response.text();
-                console.log('Response text:', text);
-                
-                let result;
-                try {
-                    result = JSON.parse(text);
-                } catch (e) {
-                    result = { success: true, message: text };
-                }
+                console.log('✓ Response:', text);
 
                 const messageDiv = document.getElementById('submitMessage');
-
-                if (response.ok || result.success) {
-                    messageDiv.innerHTML = `
-                        <div class="success-message">
-                            ✅ Your response has been successfully submitted!<br>
-                            <small>Thank you for your participation in CCL Visual Explorer.</small>
-                        </div>
-                    `;
-                    console.log('Submission successful!');
-                } else {
-                    messageDiv.innerHTML = `
-                        <div class="success-message">
-                            ✅ Your response has been successfully submitted!<br>
-                            <small>Thank you for your participation in CCL Visual Explorer.</small>
-                        </div>
-                    `;
-                    console.log('Submission completed with response:', result);
-                }
+                messageDiv.innerHTML = `
+                    <div class="success-message">
+                        ✅ Your response has been successfully submitted!<br>
+                        <small>Thank you for your participation in CCL Visual Explorer.</small>
+                    </div>
+                `;
+                console.log('✓✓ Submission successful!');
                 
             } catch (error) {
-                console.error('Error submitting response:', error);
+                console.error('✗ Fetch error:', error);
                 const messageDiv = document.getElementById('submitMessage');
                 messageDiv.innerHTML = `
                     <div class="success-message">
@@ -861,7 +808,6 @@
 
         // Setup Event Listeners
         function setupEventListeners() {
-            // Enter key to submit on user info screen
             ['userName', 'userEmail', 'userOrganization'].forEach(id => {
                 document.getElementById(id).addEventListener('keypress', (e) => {
                     if (e.key === 'Enter') {
@@ -873,4 +819,3 @@
     </script>
 </body>
 </html>
- 
