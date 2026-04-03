@@ -94,20 +94,20 @@
         }
         
         .floating-button {
-            padding: 12px 24px;
-            background: linear-gradient(135deg, #4caf50 0%, #388e3c 100%);
+            padding: 15px 30px;
+            background: linear-gradient(135deg, #FFB700 0%, #FF9500 100%);
             color: white;
             border: none;
             border-radius: 50px;
-            font-size: 1em;
+            font-size: 1.25em;
             font-weight: 700;
             cursor: pointer;
-            box-shadow: 0 4px 15px rgba(76,175,80,0.35);
+            box-shadow: 0 4px 15px rgba(255, 183, 0, 0.4);
             transition: all 0.3s ease;
             display: flex;
             align-items: center;
             gap: 10px;
-            min-width: 160px;
+            min-width: 200px;
             justify-content: center;
             white-space: nowrap;
             visibility: hidden;
@@ -118,9 +118,9 @@
         }
         
         .floating-button:hover:not(:disabled) {
-            background: linear-gradient(135deg, #45a049 0%, #2e7d32 100%);
+            background: linear-gradient(135deg, #FFC933 0%, #FFB700 100%);
             transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(76,175,80,0.5);
+            box-shadow: 0 6px 20px rgba(255, 183, 0, 0.6);
         }
         
         .floating-button:disabled {
@@ -132,9 +132,9 @@
         
         .button-count {
             background: rgba(0,0,0,0.2);
-            padding: 3px 10px;
+            padding: 4px 12px;
             border-radius: 20px;
-            font-size: 0.85em;
+            font-size: 0.95em;
             font-weight: bold;
             display: inline-block;
         }
@@ -539,10 +539,10 @@
             }
             
             .floating-button {
-                padding: 10px 20px;
-                font-size: 0.9em;
-                min-width: 140px;
-                gap: 6px;
+                padding: 12px 25px;
+                font-size: 1.1em;
+                min-width: 175px;
+                gap: 8px;
             }
             
             .header h1 {
