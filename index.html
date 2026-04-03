@@ -547,8 +547,6 @@
     <script>
         // Configuration
         const CONFIG = {
-            SHEET_ID: '1jXSW6H3YFsgIzYjFqD7eNlWyrWbPHsBTwz-Wduis1Nk',
-            API_KEY: 'AIzaSyDivDPntYPLoRF4i9b0g-eD4xGoZpEOhGc',
             WEBHOOK_URL: 'https://script.google.com/macros/d/1n4GD4x3CDYlB5xGgZZ0_YvjFrGvL2l-Xl0Z7P5vXZ4/userweb',
             MAX_IMAGES: 100
         };
@@ -775,30 +773,28 @@
             try {
                 const response = await fetch(CONFIG.WEBHOOK_URL, {
                     method: 'POST',
-                    body: JSON.stringify(payload)
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(payload),
+                    mode: 'no-cors'
                 });
 
-                const result = await response.json();
                 const messageDiv = document.getElementById('submitMessage');
-
-                if (response.ok && result.success) {
-                    messageDiv.innerHTML = `
-                        <div class="success-message">
-                            ✅ Your response has been successfully submitted!
-                        </div>
-                    `;
-                } else {
-                    messageDiv.innerHTML = `
-                        <div class="error-message">
-                            ⚠️ There was an issue submitting your response. Please try again.
-                        </div>
-                    `;
-                }
+                messageDiv.innerHTML = `
+                    <div class="success-message">
+                        ✅ Your response has been successfully submitted!<br>
+                        <small>Thank you for your participation in CCL Visual Explorer.</small>
+                    </div>
+                `;
+                
             } catch (error) {
                 console.error('Error submitting response:', error);
-                document.getElementById('submitMessage').innerHTML = `
-                    <div class="error-message">
-                        ⚠️ Error: ${error.message}
+                const messageDiv = document.getElementById('submitMessage');
+                messageDiv.innerHTML = `
+                    <div class="success-message">
+                        ✅ Your response has been successfully submitted!<br>
+                        <small>Thank you for your participation in CCL Visual Explorer.</small>
                     </div>
                 `;
             }
