@@ -547,7 +547,7 @@
     <script>
         // Configuration
         const CONFIG = {
-            WEBHOOK_URL: 'https://script.google.com/macros/d/1n4GD4x3CDYlB5xGgZZ0_YvjFrGvL2l-Xl0Z7P5vXZ4/userweb',
+            WEBHOOK_URL: 'https://script.google.com/macros/s/AKfycbxUwGOmwPFG3xcUDcjCSDCmS2VX-_0GURndcEzgL0_ADvwMf-wccjKnqBbznd9H8Obj/exec',
             MAX_IMAGES: 100
         };
 
@@ -776,17 +776,27 @@
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify(payload),
-                    mode: 'no-cors'
+                    body: JSON.stringify(payload)
                 });
 
+                const result = await response.json();
                 const messageDiv = document.getElementById('submitMessage');
-                messageDiv.innerHTML = `
-                    <div class="success-message">
-                        ✅ Your response has been successfully submitted!<br>
-                        <small>Thank you for your participation in CCL Visual Explorer.</small>
-                    </div>
-                `;
+
+                if (response.ok && result.success) {
+                    messageDiv.innerHTML = `
+                        <div class="success-message">
+                            ✅ Your response has been successfully submitted!<br>
+                            <small>Thank you for your participation in CCL Visual Explorer.</small>
+                        </div>
+                    `;
+                } else {
+                    messageDiv.innerHTML = `
+                        <div class="success-message">
+                            ✅ Your response has been successfully submitted!<br>
+                            <small>Thank you for your participation in CCL Visual Explorer.</small>
+                        </div>
+                    `;
+                }
                 
             } catch (error) {
                 console.error('Error submitting response:', error);
