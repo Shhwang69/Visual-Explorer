@@ -558,8 +558,10 @@
 
 
             card.innerHTML = `
-                <img src="${imageUrl}" alt="Card ${image.id}" loading="lazy">
-                <div class="card-number">${image.id}</div>
+    <img src="${imageUrl}" alt="Card ${image.id}" loading="lazy" decoding="async">
+    <div class="card-number">${image.id}</div>
+`;
+
             `;
 
             card.addEventListener('click', () => {
