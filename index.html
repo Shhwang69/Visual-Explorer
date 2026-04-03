@@ -58,6 +58,87 @@
             transition: width 0.3s ease;
         }
         
+        /* Header bottom section with Review button */
+        .header-bottom {
+            background: white;
+            padding: 20px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #f0f0f0;
+            position: sticky;
+            top: 0;
+            z-index: 999;
+            min-height: 60px;
+        }
+        
+        .header-info {
+            flex: 1;
+        }
+        
+        .header-info h2 {
+            font-size: 1.3em;
+            color: #333;
+            margin-bottom: 5px;
+        }
+        
+        .header-info p {
+            font-size: 0.9em;
+            color: #666;
+        }
+        
+        .review-button-container {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        .floating-button {
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #4caf50 0%, #388e3c 100%);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            font-size: 1em;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(76,175,80,0.35);
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            min-width: 160px;
+            justify-content: center;
+            white-space: nowrap;
+            visibility: hidden;
+        }
+        
+        .floating-button.visible {
+            visibility: visible;
+        }
+        
+        .floating-button:hover:not(:disabled) {
+            background: linear-gradient(135deg, #45a049 0%, #2e7d32 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(76,175,80,0.5);
+        }
+        
+        .floating-button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            opacity: 0.6;
+            box-shadow: none;
+        }
+        
+        .button-count {
+            background: rgba(0,0,0,0.2);
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: bold;
+            display: inline-block;
+        }
+        
         .content {
             padding: 40px;
             position: relative;
@@ -160,7 +241,7 @@
         }
         
         .card.selected::after {
-            content: '✓';
+            content: '';
             position: absolute;
             top: 8px;
             right: 8px;
@@ -225,62 +306,6 @@
             color: #2e7d32;
             text-align: center;
             font-size: 1.1em;
-        }
-        
-        /* Fixed Review Button - 정확한 위치 */
-        .floating-button-wrapper {
-            position: fixed;
-            top: 135px;
-            right: 60px;
-            z-index: 998;
-            display: none;
-            justify-content: center;
-            align-items: center;
-        }
-        
-        .floating-button-wrapper.visible {
-            display: flex;
-        }
-        
-        .floating-button {
-            padding: 14px 28px;
-            background: linear-gradient(135deg, #4caf50 0%, #388e3c 100%);
-            color: white;
-            border: none;
-            border-radius: 50px;
-            font-size: 1em;
-            font-weight: 700;
-            cursor: pointer;
-            box-shadow: 0 4px 15px rgba(76,175,80,0.35);
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            min-width: 170px;
-            justify-content: center;
-            white-space: nowrap;
-        }
-        
-        .floating-button:hover:not(:disabled) {
-            background: linear-gradient(135deg, #45a049 0%, #2e7d32 100%);
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(76,175,80,0.5);
-        }
-        
-        .floating-button:disabled {
-            background: #ccc;
-            cursor: not-allowed;
-            opacity: 0.6;
-            box-shadow: none;
-        }
-        
-        .button-count {
-            background: rgba(0,0,0,0.2);
-            padding: 3px 10px;
-            border-radius: 20px;
-            font-size: 0.85em;
-            font-weight: bold;
-            display: inline-block;
         }
         
         .review-grid {
@@ -499,13 +524,22 @@
                 height: 180px;
             }
             
-            .floating-button-wrapper {
-                top: 125px;
-                right: 20px;
+            .header-bottom {
+                flex-direction: column;
+                gap: 15px;
+                padding: 15px 20px;
+            }
+            
+            .header-info h2 {
+                font-size: 1.1em;
+            }
+            
+            .header-info p {
+                font-size: 0.85em;
             }
             
             .floating-button {
-                padding: 12px 20px;
+                padding: 10px 20px;
                 font-size: 0.9em;
                 min-width: 140px;
                 gap: 6px;
@@ -533,20 +567,25 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>🎨 Culture Visual Explorer</h1>
+            <h1>🌍 Culture Visual Explorer</h1>
             <p>Discover your organizational culture through visual storytelling</p>
         </div>
         <div class="progress-bar">
             <div class="progress-fill" id="progressFill"></div>
         </div>
         
-        <!-- Fixed Review Button -->
-        <div class="floating-button-wrapper" id="floatingButtonWrapper">
-            <button class="floating-button" id="submitBtn" onclick="handleReviewClick()" disabled>
-                <span>✓</span>
-                <span id="btnLabel">Review</span>
-                <span class="button-count" id="btnCount">0/3</span>
-            </button>
+        <!-- Header Bottom with Review Button -->
+        <div class="header-bottom" id="headerBottom" style="display: none;">
+            <div class="header-info">
+                <h2 id="headerTitle">Select Current Culture</h2>
+                <p id="headerSubtitle">Choose 3 images that best represent your organization</p>
+            </div>
+            <div class="review-button-container">
+                <button class="floating-button" id="submitBtn" onclick="handleReviewClick()" disabled>
+                    <span>Review</span>
+                    <span class="button-count" id="btnCount">0/3</span>
+                </button>
+            </div>
         </div>
         
         <div class="content">
@@ -585,7 +624,7 @@
             <!-- Screen 2: Current Culture Selection -->
             <div class="screen" id="screen-current">
                 <div class="gallery-container">
-                    <h2 class="gallery-title">📌 Current Culture</h2>
+                    <h2 class="gallery-title">🎯 Current Culture</h2>
                     <p class="instruction-text">Select 3 images that best represent your organization's <strong>CURRENT</strong> culture. Click each image and add your thoughts.</p>
                     <div class="selection-count">Selected: <span id="currentSelectionCount">0</span> / 3</div>
                     <div class="gallery" id="currentGallery"></div>
@@ -598,7 +637,7 @@
             
             <!-- Screen 3: Current Culture Review -->
             <div class="screen" id="screen-current-review">
-                <h2 class="review-page-title">✅ Your Current Culture Selection</h2>
+                <h2 class="review-page-title">✓ Your Current Culture Selection</h2>
                 <p class="review-page-subtitle">Please review your selections. You can go back to edit or proceed to Future Culture.</p>
                 <div class="review-grid" id="currentReviewGrid"></div>
                 
@@ -611,7 +650,7 @@
             <!-- Screen 4: Future Culture Selection -->
             <div class="screen" id="screen-future">
                 <div class="gallery-container">
-                    <h2 class="gallery-title">🌟 Future Culture</h2>
+                    <h2 class="gallery-title">🚀 Future Culture</h2>
                     <p class="instruction-text">Select 3 images that represent your organization's <strong>DESIRED FUTURE</strong> culture. Click each image and add your thoughts.</p>
                     <div class="selection-count">Selected: <span id="futureSelectionCount">0</span> / 3</div>
                     <div class="gallery" id="futureGallery"></div>
@@ -624,7 +663,7 @@
             
             <!-- Screen 5: Future Culture Review -->
             <div class="screen" id="screen-future-review">
-                <h2 class="review-page-title">✅ Your Future Culture Selection</h2>
+                <h2 class="review-page-title">✓ Your Future Culture Selection</h2>
                 <p class="review-page-subtitle">Please review your selections. You can go back to edit or proceed to final submission.</p>
                 <div class="review-grid" id="futureReviewGrid"></div>
                 
@@ -640,12 +679,12 @@
                 <p class="review-page-subtitle" style="margin-bottom: 40px;">Please review all your selections before submitting.</p>
                 
                 <div class="review-section">
-                    <h3 style="font-size: 1.3em; color: #667eea; margin-bottom: 25px; font-weight: 600;">📌 Current Culture</h3>
+                    <h3 style="font-size: 1.3em; color: #667eea; margin-bottom: 25px; font-weight: 600;">🎯 Current Culture</h3>
                     <div class="review-grid" id="currentFinalReviewGrid"></div>
                 </div>
                 
                 <div class="review-section">
-                    <h3 style="font-size: 1.3em; color: #764ba2; margin-bottom: 25px; font-weight: 600;">🌟 Future Culture</h3>
+                    <h3 style="font-size: 1.3em; color: #764ba2; margin-bottom: 25px; font-weight: 600;">🚀 Future Culture</h3>
                     <div class="review-grid" id="futureFinalReviewGrid"></div>
                 </div>
                 
@@ -658,7 +697,7 @@
             <!-- Screen 7: Completion -->
             <div class="screen" id="screen-completion">
                 <div class="completion-message">
-                    <div class="completion-icon">✅</div>
+                    <div class="completion-icon">✓</div>
                     <h2>Thank You!</h2>
                     <p>Your response has been successfully submitted.</p>
                     <p style="font-size: 0.95em; color: #999;">Your insights will help shape our organizational culture strategy.</p>
@@ -709,7 +748,7 @@
                         url: `https://raw.githubusercontent.com/${CONFIG.GITHUB_REPO}/${CONFIG.GITHUB_BRANCH}/${CONFIG.IMAGES_FOLDER}/${file.name}`
                     }));
                 
-                console.log(`✓ Loaded ${state.images.length} images`);
+                console.log(`Loaded ${state.images.length} images`);
                 
                 if (state.images.length === 0) {
                     throw new Error('No image files found in the images folder');
@@ -748,7 +787,6 @@
                 if (isSelected) card.classList.add('selected');
                 
                 const noteText = type === 'current' ? (state.currentNotes[index] || '') : (state.futureNotes[index] || '');
-                
                 const isDisabled = !isSelected;
                 
                 card.innerHTML = `
@@ -816,11 +854,7 @@
         
         function updateUI(type) {
             const selection = type === 'current' ? state.currentSelection : state.futureSelection;
-            const count = type === 'current' ? 'currentCount' : 'futureCount';
             const selCount = type === 'current' ? 'currentSelectionCount' : 'futureSelectionCount';
-            
-            const countEl = document.getElementById(count);
-            if (countEl) countEl.textContent = `${selection.length}/3`;
             
             const selCountEl = document.getElementById(selCount);
             if (selCountEl) selCountEl.textContent = selection.length;
@@ -828,6 +862,8 @@
             const submitBtn = document.getElementById('submitBtn');
             if (submitBtn) {
                 submitBtn.disabled = selection.length < 3;
+                const btnCount = document.getElementById('btnCount');
+                btnCount.textContent = `${selection.length}/3`;
             }
             
             updateProgress();
@@ -843,21 +879,25 @@
             document.getElementById('progressFill').style.width = progress + '%';
         }
         
-        function updateFloatingButton() {
-            const wrapper = document.getElementById('floatingButtonWrapper');
-            const btnLabel = document.getElementById('btnLabel');
-            const btnCount = document.getElementById('btnCount');
+        function updateHeaderBottom() {
+            const headerBottom = document.getElementById('headerBottom');
+            const headerTitle = document.getElementById('headerTitle');
+            const headerSubtitle = document.getElementById('headerSubtitle');
+            const submitBtn = document.getElementById('submitBtn');
             
             if (state.currentScreen === 'current') {
-                wrapper.classList.add('visible');
-                btnLabel.textContent = 'Review';
-                btnCount.textContent = `${state.currentSelection.length}/3`;
+                headerBottom.style.display = 'flex';
+                headerTitle.textContent = '🎯 Select Current Culture';
+                headerSubtitle.textContent = 'Choose 3 images that best represent your organization';
+                submitBtn.classList.add('visible');
             } else if (state.currentScreen === 'future') {
-                wrapper.classList.add('visible');
-                btnLabel.textContent = 'Review';
-                btnCount.textContent = `${state.futureSelection.length}/3`;
+                headerBottom.style.display = 'flex';
+                headerTitle.textContent = '🚀 Select Future Culture';
+                headerSubtitle.textContent = 'Choose 3 images that represent your desired future culture';
+                submitBtn.classList.add('visible');
             } else {
-                wrapper.classList.remove('visible');
+                headerBottom.style.display = 'none';
+                submitBtn.classList.remove('visible');
             }
         }
         
@@ -886,9 +926,14 @@
                 notes: document.getElementById('notes').value.trim()
             };
             
+            state.currentSelection = [];
+            state.currentNotes = {};
+            renderGallery('current');
+            updateUI('current');
+            
             state.currentScreen = 'current';
             showScreen('screen-current');
-            updateFloatingButton();
+            updateHeaderBottom();
             updateProgress();
         }
         
@@ -900,7 +945,7 @@
             renderReviewGrid('currentReviewGrid', state.currentSelection, state.currentNotes);
             state.currentScreen = 'review-current';
             showScreen('screen-current-review');
-            updateFloatingButton();
+            updateHeaderBottom();
             updateProgress();
         }
         
@@ -911,7 +956,7 @@
             updateUI('future');
             state.currentScreen = 'future';
             showScreen('screen-future');
-            updateFloatingButton();
+            updateHeaderBottom();
             updateProgress();
         }
         
@@ -923,7 +968,7 @@
             renderReviewGrid('futureReviewGrid', state.futureSelection, state.futureNotes);
             state.currentScreen = 'review-future';
             showScreen('screen-future-review');
-            updateFloatingButton();
+            updateHeaderBottom();
             updateProgress();
         }
         
@@ -932,7 +977,7 @@
             renderReviewGrid('futureFinalReviewGrid', state.futureSelection, state.futureNotes);
             state.currentScreen = 'final';
             showScreen('screen-final-review');
-            updateFloatingButton();
+            updateHeaderBottom();
             updateProgress();
         }
         
@@ -946,12 +991,11 @@
                 card.className = 'review-card';
                 const image = state.images[idx];
                 const noteText = notes[idx] || 'No notes added';
-                const isCurrentCulture = elementId.includes('currentFinal') || elementId === 'currentReviewGrid';
                 
                 card.innerHTML = `
                     <img src="${image.url}" alt="${image.name}">
                     <div class="review-card-info">
-                        <div class="review-card-label">${isCurrentCulture ? 'Current' : 'Future'} Culture ${pos + 1}</div>
+                        <div class="review-card-label">Selection ${pos + 1}</div>
                         <div class="review-card-note">"${noteText}"</div>
                     </div>
                 `;
@@ -984,9 +1028,20 @@
                 });
                 
                 console.log('Submission status:', response.status);
-                state.currentScreen = 'completion';
+                
+                // Reset state for new response
+                state = {
+                    userInfo: {},
+                    currentSelection: [],
+                    currentNotes: {},
+                    futureSelection: [],
+                    futureNotes: {},
+                    images: state.images,
+                    currentScreen: 'completion'
+                };
+                
                 showScreen('screen-completion');
-                updateFloatingButton();
+                updateHeaderBottom();
                 updateProgress();
                 
             } catch (error) {
@@ -1031,7 +1086,7 @@
             updateUI('future');
             
             showScreen('screen-info');
-            updateFloatingButton();
+            updateHeaderBottom();
             updateProgress();
         }
         
