@@ -483,19 +483,17 @@
     <script>
         // ===== Configuration =====
         const CONFIG = {
-            SHEET_ID: '1jXSW6H3YFsgIzYjFqD7eNlWyrWbPHsBTwz-Wduis1Nk',
-            WEBHOOK_URL: 'https://script.google.com/macros/s/AKfycbxHF0YM_Gx7PkqZZKRrv8k2U9UAOQbzpuJC15ILt48FH0KqrytTRh1dnQuLKfKFsw/exec',
-            API_KEY: 'AIzaSyDivDPntYPLoRF4i9b0g-eD4xGoZpEOhGc',
-            IMAGE_MAPPING_SHEET: 'ImageMapping'
+            WEBHOOK_URL: 'https://script.google.com/macros/s/AKfycbxHF0YM_Gx7PkqZZKRrv8k2U9UAOQbzpuJC15ILt48FH0KqrytTRh1dnQuLKfKFsw/exec'
         };
 
         let allImages = [];
         let selectedCurrent = [];
         let selectedFuture = [];
+        let totalImageCount = 0;
 
         document.addEventListener('DOMContentLoaded', async () => {
             try {
-                await loadImagesFromSheet();
+                await loadImagesFromLocal();
                 createGalleries();
                 document.getElementById('loading-screen').style.display = 'none';
                 document.getElementById('session-current').style.display = 'block';
@@ -505,28 +503,25 @@
             }
         });
 
-        async function loadImagesFromSheet() {
+        async function loadImagesFromLocal() {
             try {
-                const url = `https://sheets.googleapis.com/v4/spreadsheets/${CONFIG.SHEET_ID}/values/${CONFIG.IMAGE_MAPPING_SHEET}?key=${CONFIG.API_KEY}`;
-                const response = await fetch(url);
+                // 로컬 이미지 사용 (images 폴더에 저장된 파일)
+                allImages = [];
                 
-                if (!response.ok) {
-                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                // 이미지 파일이 있는 범위를 설정 (1부터 시작)
+                // 주의: 이 숫자를 GitHub에 업로드한 이미지 개수로 수정하세요
+                const maxImages = 100; 
+                
+                for (let i = 1; i <= maxImages; i++) {
+                    allImages.push({
+                        id: i,
+                        fileName: `CCL Image Cards - ${i}.jpg`,
+                        path: `/images/CCL Image Cards - ${i}.jpg`
+                    });
                 }
-
-                const data = await response.json();
-
-                if (!data.values || data.values.length < 2) {
-                    throw new Error('No image data found. Please check the ImageMapping sheet.');
-                }
-
-                allImages = data.values.slice(1).map(row => ({
-                    id: parseInt(row[0]),
-                    fileName: row[1],
-                    fileId: row[2]
-                })).sort((a, b) => a.id - b.id);
-
-                console.log(`${allImages.length} images loaded`);
+                
+                totalImageCount = allImages.length;
+                console.log(`${allImages.length} images loaded from local storage`);
             } catch (error) {
                 console.error('Image loading error:', error);
                 throw error;
@@ -554,14 +549,11 @@
             card.className = 'image-card';
             card.id = `${session}-${image.id}`;
 
-            const imageUrl = `https://drive.google.com/thumbnail?id=${image.fileId}&sz=w200`;
-
+            const imageUrl = image.path;
 
             card.innerHTML = `
-    <img src="${imageUrl}" alt="Card ${image.id}" loading="lazy" decoding="async">
-    <div class="card-number">${image.id}</div>
-`;
-
+                <img src="${imageUrl}" alt="Card ${image.id}" loading="lazy" decoding="async">
+                <div class="card-number">${image.id}</div>
             `;
 
             card.addEventListener('click', () => {
@@ -716,7 +708,7 @@
 
             completionCurrent.innerHTML = selectedCurrent.map(id => {
                 const image = allImages.find(img => img.id === id);
-                const url = `https://drive.google.com/uc?id=${image.fileId}&export=download`;
+                const url = image.path;
                 return `
                     <div class="selected-card-preview">
                         <img src="${url}" alt="Card ${id}">
@@ -726,7 +718,7 @@
 
             completionFuture.innerHTML = selectedFuture.map(id => {
                 const image = allImages.find(img => img.id === id);
-                const url = `https://drive.google.com/uc?id=${image.fileId}&export=download`;
+                const url = image.path;
                 return `
                     <div class="selected-card-preview">
                         <img src="${url}" alt="Card ${id}">
