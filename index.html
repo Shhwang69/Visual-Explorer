@@ -1,0 +1,773 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GGGI Visual Explorer - 조직문화 진단</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 40px 30px;
+        }
+
+        .loading-screen {
+            text-align: center;
+            padding: 60px 30px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 400px;
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 50px;
+            height: 50px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            font-size: 1.2em;
+            color: #667eea;
+            font-weight: 600;
+        }
+
+        .session-container {
+            margin-bottom: 60px;
+        }
+
+        .session-title {
+            font-size: 2em;
+            color: #667eea;
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 3px solid #667eea;
+        }
+
+        .session-subtitle {
+            font-size: 1.1em;
+            color: #666;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+
+        .instruction {
+            background: #f0f4ff;
+            padding: 20px;
+            border-left: 4px solid #667eea;
+            margin-bottom: 30px;
+            border-radius: 5px;
+            color: #333;
+        }
+
+        .gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .image-card {
+            position: relative;
+            cursor: pointer;
+            border-radius: 8px;
+            overflow: hidden;
+            aspect-ratio: 3/4;
+            transition: all 0.3s ease;
+            border: 3px solid transparent;
+            background: #f5f5f5;
+        }
+
+        .image-card img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+
+        .image-card:hover img {
+            transform: scale(1.05);
+        }
+
+        .image-card.selected {
+            border-color: #667eea;
+            box-shadow: 0 0 20px rgba(102, 126, 234, 0.5);
+            transform: scale(1.02);
+        }
+
+        .image-card.selected::after {
+            content: '✓';
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            width: 40px;
+            height: 40px;
+            background: #667eea;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5em;
+            font-weight: bold;
+            z-index: 10;
+        }
+
+        .card-number {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 8px;
+            font-size: 0.85em;
+            font-weight: 600;
+            text-align: center;
+        }
+
+        .selection-info {
+            background: #e8f5e9;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .selection-count {
+            font-size: 1.2em;
+            color: #2e7d32;
+            font-weight: 600;
+        }
+
+        .selection-count span {
+            font-size: 1.5em;
+            margin: 0 5px;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 40px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: 12px 30px;
+            font-size: 1em;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-primary:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-secondary {
+            background: #f5f5f5;
+            color: #667eea;
+            border: 2px solid #667eea;
+        }
+
+        .btn-secondary:hover {
+            background: #667eea;
+            color: white;
+        }
+
+        .response-form {
+            background: #f0f4ff;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 600;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1em;
+            font-family: inherit;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .completion-section {
+            display: none;
+            text-align: center;
+            padding: 40px;
+            background: #f0f4ff;
+            border-radius: 10px;
+        }
+
+        .completion-section.show {
+            display: block;
+        }
+
+        .completion-section h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 1.8em;
+        }
+
+        .completion-section p {
+            font-size: 1.1em;
+            color: #666;
+            margin-bottom: 20px;
+        }
+
+        .selected-images {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin: 30px 0;
+        }
+
+        .selected-card-preview {
+            border-radius: 8px;
+            overflow: hidden;
+            aspect-ratio: 3/4;
+            border: 2px solid #667eea;
+            background: #f5f5f5;
+        }
+
+        .selected-card-preview img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .alert {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+            animation: slideDown 0.3s ease;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .alert.show {
+            display: block;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.8em;
+            }
+
+            .gallery {
+                grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+                gap: 12px;
+            }
+
+            .selected-images {
+                grid-template-columns: 1fr;
+            }
+
+            .session-title {
+                font-size: 1.5em;
+            }
+
+            .content {
+                padding: 20px 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎨 GGGI 조직문화 진단</h1>
+            <p>Visual Explorer를 통해 현재와 미래의 조직문화를 표현해주세요</p>
+        </div>
+
+        <div class="content">
+            <div id="alert-container"></div>
+
+            <div id="loading-screen" class="loading-screen">
+                <div class="spinner"></div>
+                <div class="loading-text">이미지를 불러오는 중입니다...</div>
+            </div>
+
+            <div class="session-container" id="session-current" style="display: none;">
+                <h2 class="session-title">📍 현재: 우리 조직은 지금 어떤 모습인가요?</h2>
+                <p class="session-subtitle">
+                    아래 카드 중에서 현재 GGGI의 사람들, 문화, 그리고 일하는 방식을 가장 잘 나타낸다고 생각되는 카드 3장을 선택해주세요.
+                    우리 조직의 강점도 함께 고려해주세요.
+                </p>
+
+                <div class="instruction">
+                    <strong>📌 가이드:</strong> 3개의 이미지를 선택한 후 "다음 단계로"를 클릭해주세요. 각 이미지를 클릭하면 선택/해제됩니다.
+                </div>
+
+                <div class="selection-info">
+                    <span class="selection-count">선택: <span id="current-count">0</span>/3</span>
+                    <span style="color: #666; font-size: 0.9em;">선택 시 이미지 테두리가 파란색으로 변합니다</span>
+                </div>
+
+                <div class="gallery" id="gallery-current"></div>
+
+                <div class="button-group">
+                    <button class="btn-secondary" onclick="clearSelectionCurrent()">모두 해제</button>
+                    <button class="btn-primary" id="btn-next-current" onclick="proceedToFuture()" disabled>
+                        다음: 미래의 모습 →
+                    </button>
+                </div>
+            </div>
+
+            <div class="session-container" id="session-future" style="display: none;">
+                <h2 class="session-title">🚀 미래: 우리 조직이 지향해야 할 모습은?</h2>
+                <p class="session-subtitle">
+                    이번엔 GGGI가 앞으로 나아가야 할 방향, 미래에 가져야 할 문화와 일하는 방식을 나타내는 카드 3장을 선택해주세요.
+                </p>
+
+                <div class="instruction">
+                    <strong>📌 가이드:</strong> 미래 지향적인 카드 3개를 선택하고 정보를 입력한 후 "응답 제출"을 클릭해주세요.
+                </div>
+
+                <div class="response-form">
+                    <h4 style="color: #667eea; margin-bottom: 15px;">📋 기본 정보</h4>
+                    <div class="form-group">
+                        <label for="user-email">이메일: <span style="color: red;">*</span></label>
+                        <input type="email" id="user-email" placeholder="your.email@gggi.org" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="user-name">이름: <span style="color: red;">*</span></label>
+                        <input type="text" id="user-name" placeholder="이름을 입력해주세요" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="user-notes">의견 (선택사항):</label>
+                        <textarea id="user-notes" placeholder="추가 의견이 있으시면 작성해주세요"></textarea>
+                    </div>
+                </div>
+
+                <div class="selection-info">
+                    <span class="selection-count">선택: <span id="future-count">0</span>/3</span>
+                </div>
+
+                <div class="gallery" id="gallery-future"></div>
+
+                <div class="button-group">
+                    <button class="btn-secondary" onclick="backToCurrent()">← 이전으로</button>
+                    <button class="btn-secondary" onclick="clearSelectionFuture()">모두 해제</button>
+                    <button class="btn-primary" id="btn-submit" onclick="submitResponses()" disabled>
+                        응답 제출 ✓
+                    </button>
+                </div>
+            </div>
+
+            <div class="completion-section" id="completion-section">
+                <h2>🎉 감사합니다!</h2>
+                <p>당신의 응답이 성공적으로 기록되었습니다.</p>
+                
+                <h3 style="color: #667eea; margin-top: 30px; margin-bottom: 15px;">선택하신 카드들</h3>
+                
+                <div style="margin-bottom: 30px;">
+                    <h4 style="color: #666; margin-bottom: 15px;">📍 현재 조직문화</h4>
+                    <div class="selected-images" id="completion-current"></div>
+                </div>
+
+                <div style="margin-bottom: 30px;">
+                    <h4 style="color: #666; margin-bottom: 15px;">🚀 미래 조직문화</h4>
+                    <div class="selected-images" id="completion-future"></div>
+                </div>
+
+                <button class="btn-primary" onclick="resetForm()">새로 시작</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ===== 설정 =====
+        const CONFIG = {
+            SHEET_ID: '1jXSW6H3YFsgIzYjFqD7eNlWyrWbPHsBTwz-Wduis1Nk',
+            WEBHOOK_URL: 'https://script.google.com/macros/s/AKfycbxHF0YM_Gx7PkqZZKRrv8k2U9UAOQbzpuJC15ILt48FH0KqrytTRh1dnQuLKfKFsw/exec',
+            API_KEY: 'AIzaSyDivDPntYPLoRF4i9b0g-eD4xGoZpEOhGc',
+            IMAGE_MAPPING_SHEET: 'ImageMapping'
+        };
+
+        let allImages = [];
+        let selectedCurrent = [];
+        let selectedFuture = [];
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                await loadImagesFromSheet();
+                createGalleries();
+                document.getElementById('loading-screen').style.display = 'none';
+                document.getElementById('session-current').style.display = 'block';
+            } catch (error) {
+                showAlert('이미지 로드에 실패했습니다: ' + error.message, 'error');
+                console.error('초기화 오류:', error);
+            }
+        });
+
+        async function loadImagesFromSheet() {
+            try {
+                const url = `https://sheets.googleapis.com/v4/spreadsheets/${CONFIG.SHEET_ID}/values/${CONFIG.IMAGE_MAPPING_SHEET}?key=${CONFIG.API_KEY}`;
+                const response = await fetch(url);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+
+                const data = await response.json();
+
+                if (!data.values || data.values.length < 2) {
+                    throw new Error('이미지 데이터가 없습니다. ImageMapping 시트를 확인해주세요.');
+                }
+
+                allImages = data.values.slice(1).map(row => ({
+                    id: parseInt(row[0]),
+                    fileName: row[1],
+                    fileId: row[2]
+                })).sort((a, b) => a.id - b.id);
+
+                console.log(`${allImages.length}개의 이미지 로드됨`);
+            } catch (error) {
+                console.error('이미지 로드 오류:', error);
+                throw error;
+            }
+        }
+
+        function createGalleries() {
+            const galleryCurrent = document.getElementById('gallery-current');
+            const galleryFuture = document.getElementById('gallery-future');
+
+            galleryCurrent.innerHTML = '';
+            galleryFuture.innerHTML = '';
+
+            allImages.forEach(image => {
+                const cardCurrent = createImageCard(image, 'current');
+                const cardFuture = createImageCard(image, 'future');
+
+                galleryCurrent.appendChild(cardCurrent);
+                galleryFuture.appendChild(cardFuture);
+            });
+        }
+
+        function createImageCard(image, session) {
+            const card = document.createElement('div');
+            card.className = 'image-card';
+            card.id = `${session}-${image.id}`;
+
+            const imageUrl = `https://drive.google.com/uc?id=${image.fileId}&export=download`;
+
+            card.innerHTML = `
+                <img src="${imageUrl}" alt="Card ${image.id}" loading="lazy">
+                <div class="card-number">${image.id}</div>
+            `;
+
+            card.addEventListener('click', () => {
+                toggleSelection(image.id, session);
+            });
+
+            return card;
+        }
+
+        function toggleSelection(imageId, session) {
+            const card = document.getElementById(`${session}-${imageId}`);
+            const selectedList = session === 'current' ? selectedCurrent : selectedFuture;
+            const maxSelections = 3;
+
+            if (card.classList.contains('selected')) {
+                card.classList.remove('selected');
+                const index = selectedList.indexOf(imageId);
+                if (index > -1) {
+                    selectedList.splice(index, 1);
+                }
+            } else {
+                if (selectedList.length < maxSelections) {
+                    card.classList.add('selected');
+                    selectedList.push(imageId);
+                } else {
+                    showAlert('최대 3개까지만 선택할 수 있습니다!', 'error');
+                    return;
+                }
+            }
+
+            updateSelectionUI();
+        }
+
+        function updateSelectionUI() {
+            document.getElementById('current-count').textContent = selectedCurrent.length;
+            document.getElementById('future-count').textContent = selectedFuture.length;
+
+            document.getElementById('btn-next-current').disabled = selectedCurrent.length !== 3;
+            document.getElementById('btn-submit').disabled = selectedFuture.length !== 3;
+        }
+
+        function clearSelectionCurrent() {
+            selectedCurrent.forEach(id => {
+                const card = document.getElementById(`current-${id}`);
+                if (card) card.classList.remove('selected');
+            });
+            selectedCurrent = [];
+            updateSelectionUI();
+        }
+
+        function clearSelectionFuture() {
+            selectedFuture.forEach(id => {
+                const card = document.getElementById(`future-${id}`);
+                if (card) card.classList.remove('selected');
+            });
+            selectedFuture = [];
+            updateSelectionUI();
+        }
+
+        function proceedToFuture() {
+            if (selectedCurrent.length !== 3) {
+                showAlert('현재 조직문화를 나타내는 카드 3개를 선택해주세요!', 'error');
+                return;
+            }
+
+            document.getElementById('session-current').style.display = 'none';
+            document.getElementById('session-future').style.display = 'block';
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function backToCurrent() {
+            document.getElementById('session-current').style.display = 'block';
+            document.getElementById('session-future').style.display = 'none';
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        async function submitResponses() {
+            if (selectedFuture.length !== 3) {
+                showAlert('미래 조직문화를 나타내는 카드 3개를 선택해주세요!', 'error');
+                return;
+            }
+
+            const email = document.getElementById('user-email').value.trim();
+            const name = document.getElementById('user-name').value.trim();
+            const notes = document.getElementById('user-notes').value.trim();
+
+            if (!email || !name) {
+                showAlert('이메일과 이름을 입력해주세요!', 'error');
+                return;
+            }
+
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+                showAlert('유효한 이메일 주소를 입력해주세요!', 'error');
+                return;
+            }
+
+            try {
+                const submitBtn = document.getElementById('btn-submit');
+                submitBtn.disabled = true;
+                submitBtn.textContent = '제출 중...';
+
+                await saveToGoogleSheet({
+                    timestamp: new Date().toISOString(),
+                    email: email,
+                    name: name,
+                    currentSelection: selectedCurrent,
+                    futureSelection: selectedFuture,
+                    notes: notes
+                });
+
+                displayCompletion();
+                showAlert('응답이 성공적으로 제출되었습니다!', 'success');
+            } catch (error) {
+                console.error('제출 실패:', error);
+                showAlert('응답 제출 중 오류가 발생했습니다: ' + error.message, 'error');
+                document.getElementById('btn-submit').disabled = false;
+                document.getElementById('btn-submit').textContent = '응답 제출 ✓';
+            }
+        }
+
+        async function saveToGoogleSheet(data) {
+            try {
+                const response = await fetch(CONFIG.WEBHOOK_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+
+                if (!result.success) {
+                    throw new Error(result.message || '알 수 없는 오류 발생');
+                }
+
+                return result;
+            } catch (error) {
+                console.error('저장 실패:', error);
+                throw error;
+            }
+        }
+
+        function displayCompletion() {
+            document.getElementById('session-current').style.display = 'none';
+            document.getElementById('session-future').style.display = 'none';
+            document.getElementById('completion-section').classList.add('show');
+
+            const completionCurrent = document.getElementById('completion-current');
+            const completionFuture = document.getElementById('completion-future');
+
+            completionCurrent.innerHTML = selectedCurrent.map(id => {
+                const image = allImages.find(img => img.id === id);
+                const url = `https://drive.google.com/uc?id=${image.fileId}&export=download`;
+                return `
+                    <div class="selected-card-preview">
+                        <img src="${url}" alt="Card ${id}">
+                    </div>
+                `;
+            }).join('');
+
+            completionFuture.innerHTML = selectedFuture.map(id => {
+                const image = allImages.find(img => img.id === id);
+                const url = `https://drive.google.com/uc?id=${image.fileId}&export=download`;
+                return `
+                    <div class="selected-card-preview">
+                        <img src="${url}" alt="Card ${id}">
+                    </div>
+                `;
+            }).join('');
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function resetForm() {
+            selectedCurrent = [];
+            selectedFuture = [];
+
+            document.querySelectorAll('.image-card.selected').forEach(card => {
+                card.classList.remove('selected');
+            });
+
+            document.getElementById('user-email').value = '';
+            document.getElementById('user-name').value = '';
+            document.getElementById('user-notes').value = '';
+
+            updateSelectionUI();
+
+            document.getElementById('session-current').style.display = 'block';
+            document.getElementById('session-future').style.display = 'none';
+            document.getElementById('completion-section').classList.remove('show');
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function showAlert(message, type) {
+            const container = document.getElementById('alert-container');
+            const alert = document.createElement('div');
+            alert.className = `alert alert-${type} show`;
+            alert.textContent = message;
+
+            container.appendChild(alert);
+
+            setTimeout(() => {
+                alert.remove();
+            }, 5000);
+        }
+    </script>
+</body>
+</html>
