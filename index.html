@@ -267,10 +267,11 @@
             display: inline-block;
         }
         
+        /* Review Grid */
         .review-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 25px;
             margin-bottom: 30px;
         }
         
@@ -279,7 +280,7 @@
             border-radius: 8px;
             overflow: hidden;
             background: #f9f9f9;
-            transition: transform 0.2s ease;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
         }
         
         .review-card:hover {
@@ -289,31 +290,50 @@
         
         .review-card img {
             width: 100%;
-            height: 200px;
+            height: 220px;
             object-fit: cover;
             background: #f0f0f0;
             display: block;
         }
         
         .review-card-info {
-            padding: 15px;
+            padding: 18px;
         }
         
         .review-card-label {
-            font-size: 0.85em;
-            color: #666;
-            margin-bottom: 8px;
-            font-weight: 600;
+            font-size: 0.9em;
+            color: #667eea;
+            margin-bottom: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
         
         .review-card-note {
-            font-size: 0.95em;
+            font-size: 1em;
             color: #333;
             font-style: italic;
-            margin-top: 10px;
-            padding-top: 10px;
-            border-top: 1px solid #ddd;
-            line-height: 1.4;
+            line-height: 1.6;
+            padding: 12px;
+            background: white;
+            border-radius: 4px;
+            border-left: 3px solid #667eea;
+        }
+        
+        .review-page-title {
+            font-size: 1.8em;
+            color: #333;
+            margin-bottom: 10px;
+            font-weight: 600;
+            text-align: center;
+        }
+        
+        .review-page-subtitle {
+            font-size: 1.05em;
+            color: #666;
+            text-align: center;
+            margin-bottom: 35px;
+            line-height: 1.6;
         }
         
         .button-group {
@@ -445,20 +465,6 @@
             margin-bottom: 50px;
         }
         
-        .review-section-title {
-            font-size: 1.2em;
-            color: #667eea;
-            margin-bottom: 25px;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        .review-section-title.future {
-            color: #764ba2;
-        }
-        
         @media (max-width: 768px) {
             .gallery {
                 grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
@@ -467,6 +473,15 @@
             
             .card img {
                 height: 140px;
+            }
+            
+            .review-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            
+            .review-card img {
+                height: 180px;
             }
             
             .floating-button {
@@ -496,10 +511,6 @@
             button {
                 padding: 10px 20px;
                 font-size: 0.95em;
-            }
-            
-            .review-grid {
-                grid-template-columns: 1fr;
             }
         }
     </style>
@@ -550,9 +561,9 @@
             <!-- Screen 2: Current Culture Selection -->
             <div class="screen" id="screen-current">
                 <div class="floating-button-wrapper">
-                    <button class="floating-button" id="submitCurrentBtn" onclick="goToFutureCulture()" disabled>
+                    <button class="floating-button" id="submitCurrentBtn" onclick="goToCurrentReview()" disabled>
                         <span>✓</span>
-                        <span>Next Culture</span>
+                        <span>Review</span>
                         <span class="button-count" id="currentCount">0/3</span>
                     </button>
                 </div>
@@ -569,12 +580,24 @@
                 </div>
             </div>
             
-            <!-- Screen 3: Future Culture Selection -->
+            <!-- Screen 3: Current Culture Review -->
+            <div class="screen" id="screen-current-review">
+                <h2 class="review-page-title">✅ Your Current Culture Selection</h2>
+                <p class="review-page-subtitle">Please review your selections. You can go back to edit or proceed to Future Culture.</p>
+                <div class="review-grid" id="currentReviewGrid"></div>
+                
+                <div class="button-group">
+                    <button class="btn-secondary" onclick="goToCurrentCulture()">← Go Back & Edit</button>
+                    <button class="btn-primary" onclick="goToFutureCulture()">Next: Future Culture →</button>
+                </div>
+            </div>
+            
+            <!-- Screen 4: Future Culture Selection -->
             <div class="screen" id="screen-future">
                 <div class="floating-button-wrapper">
                     <button class="floating-button" id="submitFutureBtn" onclick="goToFutureReview()" disabled>
                         <span>✓</span>
-                        <span>Review & Submit</span>
+                        <span>Review</span>
                         <span class="button-count" id="futureCount">0/3</span>
                     </button>
                 </div>
@@ -591,28 +614,40 @@
                 </div>
             </div>
             
-            <!-- Screen 4: Final Review & Summary -->
+            <!-- Screen 5: Future Culture Review -->
+            <div class="screen" id="screen-future-review">
+                <h2 class="review-page-title">✅ Your Future Culture Selection</h2>
+                <p class="review-page-subtitle">Please review your selections. You can go back to edit or proceed to final submission.</p>
+                <div class="review-grid" id="futureReviewGrid"></div>
+                
+                <div class="button-group">
+                    <button class="btn-secondary" onclick="goToFutureCulture()">← Go Back & Edit</button>
+                    <button class="btn-primary" onclick="goToFinalReview()">Next: Final Review →</button>
+                </div>
+            </div>
+            
+            <!-- Screen 6: Final Review & Summary -->
             <div class="screen" id="screen-final-review">
-                <h2 style="text-align: center; color: #333; margin-bottom: 10px; font-size: 1.8em;">✅ Review Your Selections</h2>
-                <p style="text-align: center; color: #666; margin-bottom: 40px; font-size: 1.05em;">Please review all your selections before submitting.</p>
+                <h2 class="review-page-title" style="margin-bottom: 30px;">📋 Final Review</h2>
+                <p class="review-page-subtitle" style="margin-bottom: 40px;">Please review all your selections before submitting.</p>
                 
                 <div class="review-section">
-                    <h3 class="review-section-title">📌 Current Culture</h3>
+                    <h3 style="font-size: 1.3em; color: #667eea; margin-bottom: 25px; font-weight: 600;">📌 Current Culture</h3>
                     <div class="review-grid" id="currentFinalReviewGrid"></div>
                 </div>
                 
                 <div class="review-section">
-                    <h3 class="review-section-title future">🌟 Future Culture</h3>
+                    <h3 style="font-size: 1.3em; color: #764ba2; margin-bottom: 25px; font-weight: 600;">🌟 Future Culture</h3>
                     <div class="review-grid" id="futureFinalReviewGrid"></div>
                 </div>
                 
                 <div class="button-group">
-                    <button class="btn-secondary" onclick="goToFutureCulture()">← Go Back</button>
+                    <button class="btn-secondary" onclick="goToFutureReview()">← Go Back</button>
                     <button class="btn-success" onclick="submitResponse()">✓ Submit My Response</button>
                 </div>
             </div>
             
-            <!-- Screen 5: Completion -->
+            <!-- Screen 7: Completion -->
             <div class="screen" id="screen-completion">
                 <div class="completion-message">
                     <div class="completion-icon">✅</div>
@@ -629,7 +664,7 @@
     
     <script>
         const CONFIG = {
-            WEBHOOK_URL: 'https://script.google.com/macros/s/AKfycbzoxZ-UE0SSlEiuqLFtdzviBaiv1vSrXLGPggvefRUBc0-QoSbJdaxjAzCNayh5Vxz8/exec',
+            WEBHOOK_URL: 'https://script.google.com/macros/s/AKfycbxwIejOq91fTKayzBNjDT0744zPRevxF5BD96PwaPCMUNYT8m7A-DUDuCXJI_8-VQP5/exec',
             GITHUB_REPO: 'Shhwang69/Visual-Explorer',
             GITHUB_BRANCH: 'main',
             IMAGES_FOLDER: 'images',
@@ -647,10 +682,7 @@
         
         async function loadImages() {
             try {
-                // GitHub API를 통해 images 폴더의 파일 목록 가져오기
                 const apiUrl = `https://api.github.com/repos/${CONFIG.GITHUB_REPO}/contents/${CONFIG.IMAGES_FOLDER}?ref=${CONFIG.GITHUB_BRANCH}`;
-                
-                console.log('Fetching images from:', apiUrl);
                 
                 const response = await fetch(apiUrl);
                 if (!response.ok) {
@@ -659,9 +691,6 @@
                 
                 const files = await response.json();
                 
-                console.log(`Found ${files.length} files in images folder`);
-                
-                // 이미지 파일만 필터링 (jpg, png, gif)
                 state.images = files
                     .filter(file => /\.(jpg|jpeg|png|gif|webp)$/i.test(file.name))
                     .slice(0, CONFIG.MAX_IMAGES)
@@ -693,7 +722,6 @@
             errorDiv.className = 'error-message';
             errorDiv.innerHTML = '⚠️ ' + message;
             document.querySelector('.content').insertBefore(errorDiv, document.querySelector('.content').firstChild);
-            showScreen('screen-loading');
         }
         
         function renderGallery(type) {
@@ -728,7 +756,6 @@
                 gallery.appendChild(card);
             });
             
-            // 노트 입력 이벤트 리스너
             const noteInputs = gallery.querySelectorAll('.note-input');
             noteInputs.forEach(input => {
                 input.addEventListener('change', (e) => {
@@ -793,8 +820,9 @@
             if (Object.keys(state.userInfo).length > 0) step = 2;
             if (state.currentSelection.length === 3) step = 3;
             if (state.futureSelection.length === 3) step = 4;
+            if (state.futureSelection.length === 3) step = 5;
             
-            const progress = (step / 4) * 100;
+            const progress = (step / 5) * 100;
             document.getElementById('progressFill').style.width = progress + '%';
         }
         
@@ -819,11 +847,17 @@
             updateProgress();
         }
         
-        function goToFutureCulture() {
+        function goToCurrentReview() {
             if (state.currentSelection.length < 3) {
                 alert('Please select exactly 3 images for Current Culture');
                 return;
             }
+            renderReviewGrid('currentReviewGrid', state.currentSelection, state.currentNotes);
+            showScreen('screen-current-review');
+            updateProgress();
+        }
+        
+        function goToFutureCulture() {
             showScreen('screen-future');
             updateProgress();
         }
@@ -833,17 +867,19 @@
                 alert('Please select exactly 3 images for Future Culture');
                 return;
             }
-            renderFinalReview();
+            renderReviewGrid('futureReviewGrid', state.futureSelection, state.futureNotes);
+            showScreen('screen-future-review');
+            updateProgress();
+        }
+        
+        function goToFinalReview() {
+            renderReviewGrid('currentFinalReviewGrid', state.currentSelection, state.currentNotes);
+            renderReviewGrid('futureFinalReviewGrid', state.futureSelection, state.futureNotes);
             showScreen('screen-final-review');
             updateProgress();
         }
         
-        function renderFinalReview() {
-            renderReviewGrid('currentFinalReviewGrid', state.currentSelection, state.currentNotes, 'current');
-            renderReviewGrid('futureFinalReviewGrid', state.futureSelection, state.futureNotes, 'future');
-        }
-        
-        function renderReviewGrid(elementId, selection, notes, type) {
+        function renderReviewGrid(elementId, selection, notes) {
             const grid = document.getElementById(elementId);
             if (!grid) return;
             
@@ -853,11 +889,12 @@
                 card.className = 'review-card';
                 const image = state.images[idx];
                 const noteText = notes[idx] || 'No notes added';
+                const isCurrentCulture = elementId.includes('currentFinal') || elementId === 'currentReviewGrid';
                 
                 card.innerHTML = `
                     <img src="${image.url}" alt="${image.name}">
                     <div class="review-card-info">
-                        <div class="review-card-label">${type === 'current' ? 'Current' : 'Future'} Culture ${pos + 1}</div>
+                        <div class="review-card-label">${isCurrentCulture ? 'Current' : 'Future'} Culture ${pos + 1}</div>
                         <div class="review-card-note">"${noteText}"</div>
                     </div>
                 `;
@@ -935,7 +972,6 @@
             window.scrollTo(0, 0);
         }
         
-        // 페이지 로드 시 이미지 로드
         document.addEventListener('DOMContentLoaded', loadImages);
     </script>
 </body>
