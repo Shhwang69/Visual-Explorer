@@ -148,9 +148,7 @@
             height: 180px;
             object-fit: cover;
             display: block;
-            background: linear-gradient(45deg, #f0f0f0 25%, #e8e8e8 25%, #e8e8e8 50%, #f0f0f0 50%, #f0f0f0 75%, #e8e8e8 75%, #e8e8e8);
-            background-size: 20px 20px;
-            background-position: 0 0;
+            background: #f0f0f0;
         }
         
         .card.selected {
@@ -215,7 +213,6 @@
             font-size: 1.1em;
         }
         
-        /* Floating Button - Sticky at top */
         .floating-button-wrapper {
             position: sticky;
             top: 0;
@@ -294,9 +291,7 @@
             width: 100%;
             height: 200px;
             object-fit: cover;
-            background: linear-gradient(45deg, #f0f0f0 25%, #e8e8e8 25%, #e8e8e8 50%, #f0f0f0 50%, #f0f0f0 75%, #e8e8e8 75%, #e8e8e8);
-            background-size: 20px 20px;
-            background-position: 0 0;
+            background: #f0f0f0;
             display: block;
         }
         
@@ -444,15 +439,6 @@
             margin: 20px 0;
             border-left: 4px solid #c62828;
             font-weight: 500;
-        }
-        
-        .section-title {
-            font-size: 1.3em;
-            color: #333;
-            margin-bottom: 20px;
-            font-weight: 600;
-            padding-bottom: 10px;
-            border-bottom: 2px solid #f0f0f0;
         }
         
         .review-section {
@@ -643,7 +629,8 @@
     
     <script>
         const CONFIG = {
-            WEBHOOK_URL: 'https://script.google.com/macros/s/AKfycbzoxZ-UE0SSlEiuqLFtdzviBaiv1vSrXLGPggvefRUBc0-QoSbJdaxjAzCNayh5Vxz8/exec',
+            WEBHOOK_URL: 'https://script.google.com/macros/s/AKfycbxwIejOq91fTKayzBNjDT0744zPRevxF5BD96PwaPCMUNYT8m7A-DUDuCXJI_8-VQP5/exec',
+            SHEET_ID: '1jXSW6H3YFsgIzYjFqD7eNlWyrWbPHsBTwz-Wduis1Nk',
             MAX_IMAGES: 100
         };
         
@@ -658,21 +645,58 @@
         
         async function loadImages() {
             try {
-                // Apps Script의 doGet 함수를 호출하여 이미지 데이터 받기
-                const response = await fetch(CONFIG.WEBHOOK_URL);
-                const data = await response.json();
+                // CSV 직접 URL로부터 데이터 로드
+                const csvUrl = `https://docs.google.com/spreadsheets/d/${CONFIG.SHEET_ID}/export?format=csv&gid=0`;
                 
-                if (data.error) {
-                    throw new Error(data.error);
+                console.log('Fetching from:', csvUrl);
+                
+                const response = await fetch(csvUrl);
+                const csv = await response.text();
+                
+                console.log('CSV content (first 500 chars):', csv.substring(0, 500));
+                
+                const lines = csv.trim().split('\n');
+                console.log('Total lines:', lines.length);
+                
+                state.images = [];
+                
+                // 헤더 행 건너뛰고 데이터 파싱
+                for (let i = 1; i < lines.length && state.images.length < CONFIG.MAX_IMAGES; i++) {
+                    const line = lines[i].trim();
+                    if (!line) continue;
+                    
+                    // CSV 파싱 (간단한 방식)
+                    const parts = line.split(',');
+                    if (parts.length < 2) continue;
+                    
+                    const id = parts[0].trim().replace(/^"|"$/g, '');
+                    let url = parts[1].trim().replace(/^"|"$/g, '');
+                    
+                    // Google Drive URL 처리
+                    if (url.includes('/d/')) {
+                        const match = url.match(/\/d\/([a-zA-Z0-9-_]+)/);
+                        if (match) {
+                            url = `https://drive.google.com/uc?export=view&id=${match[1]}`;
+                        }
+                    }
+                    
+                    if (url && url.length > 10 && !url.includes('http')) {
+                        // URL이 아니면 스킵
+                        continue;
+                    }
+                    
+                    if (url && url.startsWith('http')) {
+                        state.images.push({
+                            id: id,
+                            url: url
+                        });
+                    }
                 }
                 
-                state.images = Array.isArray(data) ? data : [];
-                
-                console.log(`✓ Loaded ${state.images.length} images`);
+                console.log(`✓ Successfully loaded ${state.images.length} images`);
                 
                 if (state.images.length === 0) {
-                    showError('No images found. Please check the Google Sheet.');
-                    return;
+                    throw new Error('No valid images found in Google Sheet. Please check the image URLs.');
                 }
                 
                 showScreen('screen-info');
@@ -691,6 +715,7 @@
             errorDiv.className = 'error-message';
             errorDiv.innerHTML = '⚠️ ' + message;
             document.querySelector('.content').insertBefore(errorDiv, document.querySelector('.content').firstChild);
+            showScreen('screen-loading');
         }
         
         function renderGallery(type) {
@@ -710,7 +735,7 @@
                 const noteText = type === 'current' ? (state.currentNotes[index] || '') : (state.futureNotes[index] || '');
                 
                 card.innerHTML = `
-                    <img src="${image.url}" alt="Card ${index}" loading="lazy">
+                    <img src="${image.url}" alt="Card ${index}" loading="lazy" onerror="console.log('Image failed:', '${image.url}')">
                     <div class="card-note">
                         <textarea placeholder="Your thoughts..." class="note-input" data-type="${type}" data-index="${index}">${noteText}</textarea>
                     </div>
@@ -886,8 +911,7 @@
                     body: payload
                 });
                 
-                console.log('Response status:', response.status);
-                
+                console.log('Submission status:', response.status);
                 showScreen('screen-completion');
                 updateProgress();
                 
