@@ -1,25 +1,50 @@
 # GGGI Visual Explorer
 
-GGGI 조직문화 진단을 위한 Visual Explorer 웹 애플리케이션입니다.
+Visual Explorer application for GGGI Regional Leaders to assess organizational culture.
 
-## 기능
+## Features
 
-- 현재 조직문화를 나타내는 카드 3장 선택
-- 미래 조직문화를 나타내는 카드 3장 선택
-- 선택 결과를 Google Sheet에 자동 저장
+- Select 3 cards representing current organizational culture
+- Select 3 cards representing desired future organizational culture
+- Responses automatically saved to Google Sheets
+- Real-time data collection and analysis
 
-## 구성
+## How It Works
 
-- Frontend: HTML/CSS/JavaScript
-- Backend: Google Apps Script
-- Database: Google Sheets
+1. **Current State**: Choose 3 images that best represent GGGI's current culture, people, and way of working
+2. **Future Vision**: Choose 3 images representing the organizational culture GGGI should aspire to achieve
+3. **Submit**: Enter your information and submit your response
 
-## 배포
+## Technology Stack
 
-Vercel에 배포되어 있습니다.
+- **Frontend**: HTML5, CSS3, JavaScript
+- **Backend**: Google Apps Script
+- **Database**: Google Sheets
+- **Hosting**: Vercel
 
-### 접속 URL
-https://gggi-visual-explorer.vercel.app
+## Access
 
-## 개발자
-shhwang69@gmail.com
+🔗 **Live URL**: https://visual-explorer-mxtlibnhx-shhwang69-8089s-projects.vercel.app
+
+## Usage
+
+1. Visit the link above
+2. Read the instructions carefully
+3. Select 3 cards for current culture
+4. Select 3 cards for future culture
+5. Enter your email and name
+6. Submit your response
+
+## Data Collection
+
+All responses are automatically recorded in a Google Sheet for analysis. No data is shared publicly.
+
+## Contact
+
+For questions or technical support:
+- Email: shhwang69@gmail.com
+- Organization: GGGI
+
+---
+
+*Last Updated: April 2026*
