@@ -629,8 +629,10 @@
     
     <script>
         const CONFIG = {
-            WEBHOOK_URL: 'https://script.google.com/macros/s/AKfycbxwIejOq91fTKayzBNjDT0744zPRevxF5BD96PwaPCMUNYT8m7A-DUDuCXJI_8-VQP5/exec',
-            SHEET_ID: '1jXSW6H3YFsgIzYjFqD7eNlWyrWbPHsBTwz-Wduis1Nk',
+            WEBHOOK_URL: 'https://script.google.com/macros/s/AKfycbzoxZ-UE0SSlEiuqLFtdzviBaiv1vSrXLGPggvefRUBc0-QoSbJdaxjAzCNayh5Vxz8/exec',
+            GITHUB_REPO: 'Shhwang69/Visual-Explorer',
+            GITHUB_BRANCH: 'main',
+            IMAGES_FOLDER: 'images',
             MAX_IMAGES: 100
         };
         
@@ -645,58 +647,34 @@
         
         async function loadImages() {
             try {
-                // CSV 직접 URL로부터 데이터 로드
-                const csvUrl = `https://docs.google.com/spreadsheets/d/${CONFIG.SHEET_ID}/export?format=csv&gid=0`;
+                // GitHub API를 통해 images 폴더의 파일 목록 가져오기
+                const apiUrl = `https://api.github.com/repos/${CONFIG.GITHUB_REPO}/contents/${CONFIG.IMAGES_FOLDER}?ref=${CONFIG.GITHUB_BRANCH}`;
                 
-                console.log('Fetching from:', csvUrl);
+                console.log('Fetching images from:', apiUrl);
                 
-                const response = await fetch(csvUrl);
-                const csv = await response.text();
-                
-                console.log('CSV content (first 500 chars):', csv.substring(0, 500));
-                
-                const lines = csv.trim().split('\n');
-                console.log('Total lines:', lines.length);
-                
-                state.images = [];
-                
-                // 헤더 행 건너뛰고 데이터 파싱
-                for (let i = 1; i < lines.length && state.images.length < CONFIG.MAX_IMAGES; i++) {
-                    const line = lines[i].trim();
-                    if (!line) continue;
-                    
-                    // CSV 파싱 (간단한 방식)
-                    const parts = line.split(',');
-                    if (parts.length < 2) continue;
-                    
-                    const id = parts[0].trim().replace(/^"|"$/g, '');
-                    let url = parts[1].trim().replace(/^"|"$/g, '');
-                    
-                    // Google Drive URL 처리
-                    if (url.includes('/d/')) {
-                        const match = url.match(/\/d\/([a-zA-Z0-9-_]+)/);
-                        if (match) {
-                            url = `https://drive.google.com/uc?export=view&id=${match[1]}`;
-                        }
-                    }
-                    
-                    if (url && url.length > 10 && !url.includes('http')) {
-                        // URL이 아니면 스킵
-                        continue;
-                    }
-                    
-                    if (url && url.startsWith('http')) {
-                        state.images.push({
-                            id: id,
-                            url: url
-                        });
-                    }
+                const response = await fetch(apiUrl);
+                if (!response.ok) {
+                    throw new Error(`GitHub API error: ${response.status}`);
                 }
                 
-                console.log(`✓ Successfully loaded ${state.images.length} images`);
+                const files = await response.json();
+                
+                console.log(`Found ${files.length} files in images folder`);
+                
+                // 이미지 파일만 필터링 (jpg, png, gif)
+                state.images = files
+                    .filter(file => /\.(jpg|jpeg|png|gif|webp)$/i.test(file.name))
+                    .slice(0, CONFIG.MAX_IMAGES)
+                    .map((file, index) => ({
+                        id: index.toString(),
+                        name: file.name,
+                        url: `https://raw.githubusercontent.com/${CONFIG.GITHUB_REPO}/${CONFIG.GITHUB_BRANCH}/${CONFIG.IMAGES_FOLDER}/${file.name}`
+                    }));
+                
+                console.log(`✓ Loaded ${state.images.length} images`);
                 
                 if (state.images.length === 0) {
-                    throw new Error('No valid images found in Google Sheet. Please check the image URLs.');
+                    throw new Error('No image files found in the images folder');
                 }
                 
                 showScreen('screen-info');
@@ -735,7 +713,7 @@
                 const noteText = type === 'current' ? (state.currentNotes[index] || '') : (state.futureNotes[index] || '');
                 
                 card.innerHTML = `
-                    <img src="${image.url}" alt="Card ${index}" loading="lazy" onerror="console.log('Image failed:', '${image.url}')">
+                    <img src="${image.url}" alt="${image.name}" loading="lazy">
                     <div class="card-note">
                         <textarea placeholder="Your thoughts..." class="note-input" data-type="${type}" data-index="${index}">${noteText}</textarea>
                     </div>
@@ -877,7 +855,7 @@
                 const noteText = notes[idx] || 'No notes added';
                 
                 card.innerHTML = `
-                    <img src="${image.url}" alt="${type} ${pos + 1}">
+                    <img src="${image.url}" alt="${image.name}">
                     <div class="review-card-info">
                         <div class="review-card-label">${type === 'current' ? 'Current' : 'Future'} Culture ${pos + 1}</div>
                         <div class="review-card-note">"${noteText}"</div>
@@ -896,12 +874,12 @@
             payload.append('notes', state.userInfo.notes);
             
             state.currentSelection.forEach((idx, i) => {
-                payload.append(`current${i + 1}`, idx);
+                payload.append(`current${i + 1}`, state.images[idx].name);
                 payload.append(`currentNote${i + 1}`, state.currentNotes[idx] || '');
             });
             
             state.futureSelection.forEach((idx, i) => {
-                payload.append(`future${i + 1}`, idx);
+                payload.append(`future${i + 1}`, state.images[idx].name);
                 payload.append(`futureNote${i + 1}`, state.futureNotes[idx] || '');
             });
             
